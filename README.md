@@ -3,7 +3,7 @@
 | UWA ID |     Name     |  GitHub User Name  |
 |--------|--------------|--------------------|
 |23778874|Brian Chan    |-                   |
-|24476802|Norbu Tshering|-                   |
+|24476802|Norbu Tshering|norbu13                   |
 |23902644|Seoyoung Park |VSTERNENLICHT       |
 |22974298|Max Bennett   |Max-Bennett-22974298|
 
