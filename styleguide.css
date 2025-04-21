@@ -1,0 +1,43 @@
+:root {
+    --default-white: rgba(255, 255, 255, 1);
+    --neutralblack: rgba(33, 33, 33, 1);
+    --neutralwhite: rgba(255, 255, 255, 1);
+    --neutralsilver: rgba(245, 247, 250, 1);
+    --label-medium-label-font-family: "Inter", Helvetica;
+    --label-medium-label-font-weight: 500;
+    --label-medium-label-font-size: 14px;
+    --label-medium-label-letter-spacing: 0px;
+    --label-medium-label-line-height: 20px;
+    --label-medium-label-font-style: normal;
+    --heading-headline-4-font-family: "Inter", Helvetica;
+    --heading-headline-4-font-weight: 600;
+    --heading-headline-4-font-size: 20px;
+    --heading-headline-4-letter-spacing: 0px;
+    --heading-headline-4-line-height: 28px;
+    --heading-headline-4-font-style: normal;
+    --heading-headline-2-font-family: "Inter", Helvetica;
+    --heading-headline-2-font-weight: 600;
+    --heading-headline-2-font-size: 36px;
+    --heading-headline-2-letter-spacing: 0px;
+    --heading-headline-2-line-height: 44px;
+    --heading-headline-2-font-style: normal;
+    --body-medium-body-1-font-family: "Inter", Helvetica;
+    --body-medium-body-1-font-weight: 500;
+    --body-medium-body-1-font-size: 18px;
+    --body-medium-body-1-letter-spacing: 0px;
+    --body-medium-body-1-line-height: 28px;
+    --body-medium-body-1-font-style: normal;
+    --body-regular-body-2-font-family: "Inter", Helvetica;
+    --body-regular-body-2-font-weight: 400;
+    --body-regular-body-2-font-size: 16px;
+    --body-regular-body-2-letter-spacing: 0px;
+    --body-regular-body-2-line-height: 24px;
+    --body-regular-body-2-font-style: normal;
+    --button-link-medium-font-family: "Inter", Helvetica;
+    --button-link-medium-font-weight: 400;
+    --button-link-medium-font-size: 16px;
+    --button-link-medium-letter-spacing: 0px;
+    --button-link-medium-line-height: 20px;
+    --button-link-medium-font-style: normal;
+  }
+  
