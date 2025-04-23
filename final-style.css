@@ -5,6 +5,7 @@ body {
   font-family: "Inter", Helvetica, sans-serif;
   background-color: #ffffff;
   color: #212121;
+  overflow-x: hidden;
 }
 
 header {
@@ -89,4 +90,8 @@ footer {
   padding-bottom: 20px;
   width: 100vw; 
   margin-left: calc(-50vw + 50%);
+}
+
+.nav-link:hover {
+  text-decoration: underline;
 }
