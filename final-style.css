@@ -19,13 +19,21 @@ header {
   margin-bottom: 6rem;
 }
 
+.main-image {
+  padding-left: 1rem;
+}
+
 h1, h2, h3, h5 {
   font-weight: 600;
 }
 
 h1.display-5 {
-  font-size: 36px;
-  line-height: 44px;
+  color: var(#212121);
+  font-size: 64px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 80px; /* 125% */
+  letter-spacing: 1.92px;
 }
 
 h2.h1 {
@@ -44,8 +52,10 @@ p.lead {
 }
 
 p.fs-3 {
-  font-size: 24px;
+  font-size: 18px;
+  font-style: normal;
   font-weight: 600;
+  line-height: 28px; /* 140% */
 }
 
 .features-section img {
