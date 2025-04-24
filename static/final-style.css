@@ -10,7 +10,7 @@ body {
 
 header {
   background-color: #f3f3e0;
-  padding-bottom: 20px;
+  padding-bottom: 0px;
   width: 100vw; 
   margin-left: calc(-50vw + 50%);
 }
@@ -87,7 +87,6 @@ p.fs-3 {
 .btn-outline-primary {
   color: #133e87;
   border-color: #133e87;
-  background-color: transparent;
 }
 
 .btn-outline-primary:hover {
@@ -98,6 +97,17 @@ p.fs-3 {
 
 .logout-icon:hover {
   color: #133e87 !important;
+  transition: color 0.2s ease;
+}
+
+.go-to-calculator {
+  color: #133e87;
+  border-color: #133e87;
+}
+
+.go-to-calculator:hover {
+  background-color: #608BC1 !important;
+  color: #fff; 
   transition: color 0.2s ease;
 }
 
