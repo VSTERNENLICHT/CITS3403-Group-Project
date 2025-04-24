@@ -66,22 +66,39 @@ p.fs-3 {
 
 .text-primary {
   color: #133e87 !important;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 80px; /* 125% */
+  letter-spacing: 1.92px;
 }
 
 .btn-primary {
   background-color: #133e87;
   border-color: #133e87;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #0f2f6e; /* darker blue on hover */
+  border-color: #0f2f6e;
+  color: #fff;
 }
 
 .btn-outline-primary {
   color: #133e87;
   border-color: #133e87;
+  background-color: transparent;
 }
 
 .btn-outline-primary:hover {
   background-color: #133e87;
   color: #fff;
   border-color: #133e87;
+}
+
+.logout-icon:hover {
+  color: #133e87 !important;
+  transition: color 0.2s ease;
 }
 
 footer {
