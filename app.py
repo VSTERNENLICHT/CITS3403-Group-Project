@@ -1,7 +1,16 @@
+from flask import Flask, request, jsonify, render_template
+from models import db, Goal
 import io
 import matplotlib.pyplot as plt
-from flask import send_file, request
-from models import Goal  # assuming your goal table is used
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///goals.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
+
+@app.route('/')
+def home():
+    return render_template('SharePage.html')
 
 @app.route('/generate-graph', methods=['POST'])
 def generate_graph():
@@ -36,3 +45,7 @@ def generate_graph():
         plt.savefig(buf, format='pdf')
         buf.seek(0)
         return send_file(buf, mimetype='application/pdf', download_name='calcmywam_graph.pdf', as_attachment=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
