@@ -9,11 +9,12 @@ body {
 
 /* === Header === */
 
-header {
+header, .result-graph .overlap {
   background-color: #f3f3e0;
   width: 100vw;
   height: 104px;
   margin-left: calc(-50vw + 50%);
+  position: relative;
 }
 
 /* === Section Spacing === */
@@ -32,9 +33,8 @@ h1, h2, h3, h5 {
 
 h1.display-5 {
   font-size: 64px;
-  font-style: normal;
   font-weight: 600;
-  line-height: 80px; /* 125% */
+  line-height: 80px;
   letter-spacing: 1.92px;
 }
 
@@ -55,45 +55,33 @@ p.lead {
 
 p.fs-3 {
   font-size: 18px;
-  font-style: normal;
   font-weight: 600;
   line-height: 28px;
 }
 
-/* === Layout for Result Graph Page === */
+/* === Layout: Result Graph Page === */
 
 .result-graph {
   background-color: #ffffff;
   display: flex;
-  flex-direction: row;
   justify-content: center;
   width: 100%;
 }
 
 .result-graph .div {
-  background-color: #ffffff;
+  position: relative;
   width: 1440px;
   height: 1149px;
-  position: relative;
-}
-
-.result-graph .overlap {
-  position: absolute;
-  width: 1440px;
-  height: 104px;
-  top: 0;
-  left: 0;
-  background-color: #f3f3e0;
 }
 
 .result-graph .top-bar {
-  display: flex;
-  width: 1120px;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
+  position: absolute;
   top: 16px;
   left: 160px;
+  width: 1120px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .result-graph .button {
@@ -101,13 +89,15 @@ p.fs-3 {
   height: 72px;
   background-image: url(./img/logo.png);
   background-size: cover;
-  background-position: 50% 50%;
+  background-position: center;
 }
 
 .result-graph .box-arrow-left {
   width: 50px;
   height: 50px;
 }
+
+/* Rectangle Graph Area */
 
 .result-graph .rectangle {
   position: absolute;
@@ -118,7 +108,7 @@ p.fs-3 {
   background-color: #d9d9d9;
 }
 
-/* === Typography Inside Result Graph === */
+/* Graph Titles */
 
 .result-graph .text-wrapper {
   position: absolute;
@@ -126,9 +116,8 @@ p.fs-3 {
   top: 20px;
   left: 219px;
   font-family: "Roboto-Regular", Helvetica, sans-serif;
-  font-weight: 400;
   font-size: 64px;
-  line-height: normal;
+  font-weight: 400;
   color: #000000;
   white-space: nowrap;
 }
@@ -139,14 +128,13 @@ p.fs-3 {
   top: 20px;
   left: 846px;
   font-family: "Roboto-Regular", Helvetica, sans-serif;
-  font-weight: 400;
   font-size: 64px;
-  line-height: normal;
+  font-weight: 400;
   color: #000000;
   white-space: nowrap;
 }
 
-/* === Icons and Arrows === */
+/* Arrows in Graph */
 
 .result-graph .box-arrow-up {
   position: absolute;
@@ -164,23 +152,22 @@ p.fs-3 {
   left: 1182px;
 }
 
-/* === Subheadings === */
+/* Section Title */
 
 .result-graph .web-heading-headline {
   position: absolute;
   width: 180px;
   top: 110px;
   left: 162px;
-  -webkit-text-stroke: 1px #000000;
   font-family: "Inter-SemiBold", Helvetica, sans-serif;
-  font-weight: 600;
   font-size: 36px;
-  line-height: 44px;
+  font-weight: 600;
+  -webkit-text-stroke: 1px #000000;
   color: #00000033;
   white-space: nowrap;
 }
 
-/* === Cards (Overlapping Groups) === */
+/* Card Groups */
 
 .result-graph .overlap-group,
 .result-graph .overlap-group-2 {
@@ -201,7 +188,7 @@ p.fs-3 {
   left: 850px;
 }
 
-/* === Card Text === */
+/* Card Texts */
 
 .result-graph .text-wrapper-3 {
   position: absolute;
@@ -209,8 +196,8 @@ p.fs-3 {
   top: 8px;
   left: 24px;
   font-family: "Inter-Regular", Helvetica, sans-serif;
-  font-weight: 400;
   font-size: 36px;
+  font-weight: 400;
   color: #000000;
 }
 
@@ -220,8 +207,8 @@ p.fs-3 {
   top: 8px;
   left: 50px;
   font-family: "Inter-Regular", Helvetica, sans-serif;
-  font-weight: 400;
   font-size: 36px;
+  font-weight: 400;
   color: #000000;
 }
 
@@ -231,12 +218,12 @@ p.fs-3 {
   top: 292px;
   left: 97px;
   font-family: "Inter-Regular", Helvetica, sans-serif;
-  font-weight: 400;
   font-size: 24px;
+  font-weight: 400;
   color: #000000;
 }
 
-/* === Arrows Inside Cards === */
+/* Card Arrow */
 
 .result-graph .arrow {
   position: absolute;
@@ -256,7 +243,7 @@ footer {
   margin-left: calc(-50vw + 50%);
 }
 
-/* === Buttons and Hover States (General) === */
+/* === Buttons & Hover States === */
 
 .btn-primary {
   background-color: #133e87;
@@ -302,3 +289,4 @@ footer {
 .nav-link:hover {
   text-decoration: underline;
 }
+
