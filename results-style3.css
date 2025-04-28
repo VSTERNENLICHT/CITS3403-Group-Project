@@ -3,28 +3,218 @@
 body {
   font-family: "Inter", Helvetica, sans-serif;
   background-color: #ffffff;
-  color: #000000;
+  color: #212121;
   overflow-x: hidden;
 }
 
-/* === Header === */
-
-header, .result-graph .overlap {
+header {
   background-color: #f3f3e0;
+  padding-bottom: 0px;
   width: 100vw;
-  height: 104px;
   margin-left: calc(-50vw + 50%);
+}
+
+/* === Result Graph Section === */
+
+.result-graph {
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+.result-graph .div {
+  background-color: #ffffff;
+  width: 1440px;
+  height: 1149px;
   position: relative;
 }
 
-/* === Section Spacing === */
-
-.section-spaced {
-  margin-top: 6rem;
-  margin-bottom: 6rem;
+.result-graph .overlap {
+  position: absolute;
+  width: 1440px;
+  height: 104px;
+  top: 0;
+  left: 0;
+  background-color: #f3f3e0;
 }
 
-/* === Typography === */
+.result-graph .top-bar {
+  display: flex;
+  width: 1120px;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  top: 16px;
+  left: 160px;
+}
+
+.result-graph .button {
+  position: relative;
+  width: 163.1px;
+  height: 72px;
+  background-image: url(./img/logo.png);
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
+.result-graph .box-arrow-left {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+/* Rectangle Graph Background */
+
+.result-graph .rectangle {
+  position: absolute;
+  width: 1227px;
+  height: 528px;
+  top: 584px;
+  left: 117px;
+  background-color: #d9d9d9;
+}
+
+/* Titles Inside Graph */
+
+.result-graph .text-wrapper {
+  position: absolute;
+  width: 248px;
+  top: 20px;
+  left: 219px;
+  font-family: "Roboto-Regular", Helvetica, sans-serif;
+  font-weight: 400;
+  color: #000000;
+  font-size: 64px;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.result-graph .text-wrapper-2 {
+  position: absolute;
+  width: 222px;
+  top: 20px;
+  left: 846px;
+  font-family: "Roboto-Regular", Helvetica, sans-serif;
+  font-weight: 400;
+  color: #000000;
+  font-size: 64px;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+/* Arrows */
+
+.result-graph .box-arrow-up {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 474px;
+  left: 606px;
+}
+
+.result-graph .img {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 474px;
+  left: 1182px;
+}
+
+/* Subheader Text */
+
+.result-graph .web-heading-headline {
+  position: absolute;
+  width: 180px;
+  top: 110px;
+  left: 162px;
+  font-family: "Inter-SemiBold", Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 36px;
+  -webkit-text-stroke: 1px #000000;
+  color: #00000033;
+  letter-spacing: 0;
+  line-height: 44px;
+  white-space: nowrap;
+}
+
+/* Cards / Groups */
+
+.result-graph .overlap-group {
+  position: absolute;
+  width: 413px;
+  height: 344px;
+  top: 184px;
+  left: 175px;
+  background-color: #ababab;
+  border-radius: 52px;
+}
+
+.result-graph .overlap-group-2 {
+  position: absolute;
+  width: 413px;
+  height: 344px;
+  top: 184px;
+  left: 850px;
+  background-color: #ababab;
+  border-radius: 52px;
+}
+
+/* Text Inside Cards */
+
+.result-graph .text-wrapper-3 {
+  position: absolute;
+  width: 365px;
+  top: 8px;
+  left: 24px;
+  font-family: "Inter-Regular", Helvetica, sans-serif;
+  font-weight: 400;
+  color: #000000;
+  font-size: 36px;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+.result-graph .text-wrapper-4 {
+  position: absolute;
+  width: 318px;
+  top: 8px;
+  left: 50px;
+  font-family: "Inter-Regular", Helvetica, sans-serif;
+  font-weight: 400;
+  color: #000000;
+  font-size: 36px;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+.result-graph .text-wrapper-5 {
+  position: absolute;
+  width: 185px;
+  top: 292px;
+  left: 97px;
+  font-family: "Inter-Regular", Helvetica, sans-serif;
+  font-weight: 400;
+  color: #000000;
+  font-size: 24px;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+/* Arrows inside cards */
+
+.result-graph .arrow {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  top: 285px;
+  left: 32px;
+}
+
+/* === General Typography === */
 
 h1, h2, h3, h5 {
   font-weight: 600;
@@ -59,191 +249,21 @@ p.fs-3 {
   line-height: 28px;
 }
 
-/* === Layout: Result Graph Page === */
+/* === Features Section === */
 
-.result-graph {
-  background-color: #ffffff;
-  display: flex;
-  justify-content: center;
-  width: 100%;
+.features-section img {
+  width: 80px;
+  height: auto;
 }
 
-.result-graph .div {
-  position: relative;
-  width: 1440px;
-  height: 1149px;
-}
+/* === Buttons and Colors === */
 
-.result-graph .top-bar {
-  position: absolute;
-  top: 16px;
-  left: 160px;
-  width: 1120px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.result-graph .button {
-  width: 163.1px;
-  height: 72px;
-  background-image: url(./img/logo.png);
-  background-size: cover;
-  background-position: center;
-}
-
-.result-graph .box-arrow-left {
-  width: 50px;
-  height: 50px;
-}
-
-/* Rectangle Graph Area */
-
-.result-graph .rectangle {
-  position: absolute;
-  width: 1227px;
-  height: 528px;
-  top: 584px;
-  left: 117px;
-  background-color: #d9d9d9;
-}
-
-/* Graph Titles */
-
-.result-graph .text-wrapper {
-  position: absolute;
-  width: 248px;
-  top: 20px;
-  left: 219px;
-  font-family: "Roboto-Regular", Helvetica, sans-serif;
-  font-size: 64px;
-  font-weight: 400;
-  color: #000000;
-  white-space: nowrap;
-}
-
-.result-graph .text-wrapper-2 {
-  position: absolute;
-  width: 222px;
-  top: 20px;
-  left: 846px;
-  font-family: "Roboto-Regular", Helvetica, sans-serif;
-  font-size: 64px;
-  font-weight: 400;
-  color: #000000;
-  white-space: nowrap;
-}
-
-/* Arrows in Graph */
-
-.result-graph .box-arrow-up {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  top: 474px;
-  left: 606px;
-}
-
-.result-graph .img {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  top: 474px;
-  left: 1182px;
-}
-
-/* Section Title */
-
-.result-graph .web-heading-headline {
-  position: absolute;
-  width: 180px;
-  top: 110px;
-  left: 162px;
-  font-family: "Inter-SemiBold", Helvetica, sans-serif;
-  font-size: 36px;
+.text-primary {
+  color: #133e87 !important;
   font-weight: 600;
-  -webkit-text-stroke: 1px #000000;
-  color: #00000033;
-  white-space: nowrap;
+  line-height: 80px;
+  letter-spacing: 1.92px;
 }
-
-/* Card Groups */
-
-.result-graph .overlap-group,
-.result-graph .overlap-group-2 {
-  position: absolute;
-  width: 413px;
-  height: 344px;
-  background-color: #ababab;
-  border-radius: 52px;
-}
-
-.result-graph .overlap-group {
-  top: 184px;
-  left: 175px;
-}
-
-.result-graph .overlap-group-2 {
-  top: 184px;
-  left: 850px;
-}
-
-/* Card Texts */
-
-.result-graph .text-wrapper-3 {
-  position: absolute;
-  width: 365px;
-  top: 8px;
-  left: 24px;
-  font-family: "Inter-Regular", Helvetica, sans-serif;
-  font-size: 36px;
-  font-weight: 400;
-  color: #000000;
-}
-
-.result-graph .text-wrapper-4 {
-  position: absolute;
-  width: 318px;
-  top: 8px;
-  left: 50px;
-  font-family: "Inter-Regular", Helvetica, sans-serif;
-  font-size: 36px;
-  font-weight: 400;
-  color: #000000;
-}
-
-.result-graph .text-wrapper-5 {
-  position: absolute;
-  width: 185px;
-  top: 292px;
-  left: 97px;
-  font-family: "Inter-Regular", Helvetica, sans-serif;
-  font-size: 24px;
-  font-weight: 400;
-  color: #000000;
-}
-
-/* Card Arrow */
-
-.result-graph .arrow {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  top: 285px;
-  left: 32px;
-}
-
-/* === Footer === */
-
-footer {
-  background-color: #f3f3e0;
-  font-size: 14px;
-  padding-bottom: 20px;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-}
-
-/* === Buttons & Hover States === */
 
 .btn-primary {
   background-color: #133e87;
@@ -284,9 +304,20 @@ footer {
   transition: color 0.2s ease;
 }
 
-/* === Navigation === */
+/* === Footer === */
+
+footer {
+  background-color: #f3f3e0;
+  font-size: 14px;
+  padding-bottom: 20px;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
+/* === Navigation Links === */
 
 .nav-link:hover {
   text-decoration: underline;
 }
+
 
