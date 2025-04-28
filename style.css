@@ -1,0 +1,120 @@
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f9f9f9;
+}
+
+.result-graph {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.div {
+  width: 100%;
+  max-width: 1200px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.overlap {
+  position: relative;
+  background-color: #4f46e5;
+  height: 60px;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+}
+
+.button {
+  width: 40px;
+  height: 40px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.box-arrow-left {
+  width: 24px;
+  height: 24px;
+}
+
+.rectangle {
+  padding: 20px;
+}
+
+.line-chart, .line-chart-2 {
+  margin-top: 40px;
+  position: relative;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.overlap-group, .overlap-2 {
+  position: relative;
+}
+
+.img, .img-2,
+.x-axis-grid, .x-axis-grid-2, .x-axis-grid-3, .x-axis-grid-4, .x-axis-grid-5, .x-axis-grid-6,
+.y-axis-grid, .y-axis-grid-2, .y-axis-grid-3, .y-axis-grid-4, .y-axis-grid-5,
+.y-axis-grid-6, .y-axis-grid-7, .y-axis-grid-8, .y-axis-grid-9, .y-axis-grid-10, .y-axis-grid-11, .y-axis-grid-12,
+.line, .line-2, 
+.marker, .marker-2, .marker-3, .marker-4, .marker-5, .marker-6, .marker-7, .marker-8,
+.x-axis, .x-axis-2 {
+  position: absolute;
+}
+
+.text-wrapper, .text-wrapper-2, .text-wrapper-3, .text-wrapper-4,
+.text-wrapper-5, .text-wrapper-6, .text-wrapper-7, .text-wrapper-8,
+.text-wrapper-9, .text-wrapper-10, .text-wrapper-11, .text-wrapper-12,
+.text-wrapper-13, .text-wrapper-14, .text-wrapper-15, .text-wrapper-16,
+.text-wrapper-17, .text-wrapper-18, .text-wrapper-19, .text-wrapper-20,
+.text-wrapper-21, .text-wrapper-22, .text-wrapper-23, .text-wrapper-24,
+.text-wrapper-25, .text-wrapper-26, .text-wrapper-27 {
+  font-size: 14px;
+  color: #333;
+  margin: 8px 0;
+}
+
+.text-wrapper-23, .text-wrapper-24 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.share, .share-2, .sync {
+  width: 24px;
+  height: 24px;
+  margin: 10px;
+}
+
+.overlap-3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #e0e7ff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.web-heading-headline {
+  font-size: 32px;
+  font-weight: bold;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.div-wrapper {
+  margin-top: 20px;
+  background-color: #dbeafe;
+  padding: 10px;
+  border-radius: 8px;
+}
