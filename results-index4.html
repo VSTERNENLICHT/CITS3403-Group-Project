@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Existing meta tags remain the same -->
+  <title>CalcMyWAM - Results Summary</title>
+  
+  <!-- Add Inter font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Rest of head remains the same -->
+</head>
+
+<body class="bg-white text-dark">
+  <!-- Improved Header -->
+  <header class="bg-light border-bottom py-3 px-4">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div class="logo" style="width: 160px; height: 70px; background: url('./img/logo.png') center/contain no-repeat;"></div>
+      <a href="/" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+        <i class="bi bi-arrow-left fs-5"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container my-5 py-4">
+    <!-- Summary Heading -->
+    <h2 class="text-center display-5 mb-5 fw-bold text-primary">Results Summary</h2>
+
+    <!-- Results Cards Section -->
+    <div class="row g-4 justify-content-center mb-5">
+      <!-- Predicted Results Card -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center p-4">
+            <h3 class="card-title fw-bold mb-4">Predicted Results</h3>
+            <div class="results-display">
+              <div class="mb-4">
+                <h4 class="text-muted mb-2">GPA</h4>
+                <div class="display-4 fw-bold text-primary">3.2</div>
+              </div>
+              <div class="mb-3">
+                <h4 class="text-muted mb-2">WAM</h4>
+                <div class="display-4 fw-bold text-primary">72.5</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Desired Results Card -->
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center p-4">
+            <h3 class="card-title fw-bold mb-4">Desired Results</h3>
+            <div class="results-display">
+              <div class="mb-4">
+                <h4 class="text-muted mb-2">GPA</h4>
+                <div class="display-4 fw-bold text-success">3.5</div>
+              </div>
+              <div class="mb-3">
+                <h4 class="text-muted mb-2">WAM</h4>
+                <div class="display-4 fw-bold text-success">75.0</div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <a href="/reset" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-clockwise me-2"></i> Reset Goals
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="text-center mt-5">
+      <h4 class="mb-4">Upload New Results</h4>
+      <div class="d-flex justify-content-center gap-4">
+        <a href="/upload" class="btn btn-primary px-4 py-3">
+          <i class="bi bi-upload me-2"></i> Upload Transcript
+        </a>
+        <a href="/upload" class="btn btn-outline-primary px-4 py-3">
+          <i class="bi bi-file-earmark-plus me-2"></i> Manual Entry
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS remains the same -->
+</body>
+</html>
