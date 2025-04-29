@@ -10,7 +10,7 @@ body {
 
 header {
   background-color: #f3f3e0;
-  padding-bottom: 0px;
+  padding-bottom: 20px;
   width: 100vw; 
   margin-left: calc(-50vw + 50%);
 }
@@ -64,6 +64,43 @@ p.fs-3 {
   height: auto;
 }
 
+/* === Results Page Specific Styles === */
+
+.result-card {
+  background-color: #ababab;
+  border-radius: 2rem;
+  min-height: 120px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#gpa-value, #wam-value, #predicted-wam, #desired-wam {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.section-results {
+  background-color: #f8f9fa;
+  border-radius: 2rem;
+  padding: 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 400px;
+  position: relative;
+}
+
+.upload-icons {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  width: 100%;
+  padding: 0 5rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+
 .text-primary {
   color: #133e87 !important;
   font-style: normal;
@@ -87,6 +124,7 @@ p.fs-3 {
 .btn-outline-primary {
   color: #133e87;
   border-color: #133e87;
+  background-color: transparent;
 }
 
 .btn-outline-primary:hover {
@@ -97,17 +135,6 @@ p.fs-3 {
 
 .logout-icon:hover {
   color: #133e87 !important;
-  transition: color 0.2s ease;
-}
-
-.go-to-calculator {
-  color: #133e87;
-  border-color: #133e87;
-}
-
-.go-to-calculator:hover {
-  background-color: #608BC1 !important;
-  color: #fff; 
   transition: color 0.2s ease;
 }
 
