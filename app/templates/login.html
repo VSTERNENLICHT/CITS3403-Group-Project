@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | CalcMyWAM</title>
+    <link rel="icon" href="static/favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='final-style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+      body {
+        background-image: url('{{ url_for("static", filename="Images/background.jpg") }}');
+      }
+      .blur {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+      .btn-long {
+        width: 200px; /* Adjust the width as needed */
+      }
+    </style>
+  </head>
+  <body>
+    <header class="border-top pt-2 pb-2 px-5">
+      <div class="d-flex justify-content-between align-items-center mb-1 pt-0">
+        <img src="{{ url_for('static', filename='Images/logo.png')}}" width="135.917" height="60">
+      </div>
+    </header>
+    <div class="container p-5 my-5 text-center blur">
+      <h1>Login</h1>
+      <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p style="margin-left: -160px; margin-bottom: 0px;">{{ form.email.label }}</p>
+        <p>{{ form.email }}</p>
+        <p style="margin-left: -129.75px; margin-bottom: 0px;">{{ form.password.label }}</p>
+        <p>{{ form.password }}</p>
+        {{ form.submit(class="btn btn-success btn-long") }}
+      </form>
+      <br>
+      <p>Don't have an account? <a href="{{ url_for('sign_up') }}">Sign up here</a></p>
+  </body>
+</html>
