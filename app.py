@@ -42,10 +42,5 @@ if __name__ == '__main__':
 
 @app.route('/')
 def home():
-    return render_template('set-goal.html')  # or whatever your homepage is
-
-
-@app.route('/')
-def home():
-    return render_template('set-goal.html')
+    return render_template('mainpage.html')
 
