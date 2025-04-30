@@ -66,37 +66,16 @@ p.fs-3 {
 
 .text-primary {
   color: #133e87 !important;
-<<<<<<< HEAD
-=======
-  font-style: normal;
-  font-weight: 600;
-  line-height: 80px; /* 125% */
-  letter-spacing: 1.92px;
->>>>>>> c6590f8 (Page created / storing method should be fixed later)
 }
 
 .btn-primary {
   background-color: #133e87;
   border-color: #133e87;
-<<<<<<< HEAD
-=======
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background-color: #0f2f6e; /* darker blue on hover */
-  border-color: #0f2f6e;
-  color: #fff;
->>>>>>> c6590f8 (Page created / storing method should be fixed later)
 }
 
 .btn-outline-primary {
   color: #133e87;
   border-color: #133e87;
-<<<<<<< HEAD
-=======
-  background-color: transparent;
->>>>>>> c6590f8 (Page created / storing method should be fixed later)
 }
 
 .btn-outline-primary:hover {
@@ -105,14 +84,6 @@ p.fs-3 {
   border-color: #133e87;
 }
 
-<<<<<<< HEAD
-=======
-.logout-icon:hover {
-  color: #133e87 !important;
-  transition: color 0.2s ease;
-}
-
->>>>>>> c6590f8 (Page created / storing method should be fixed later)
 footer {
   background-color: #f3f3e0;
   font-size: 14px;
