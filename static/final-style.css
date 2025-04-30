@@ -64,6 +64,10 @@ p.fs-3 {
   height: auto;
 }
 
+.text-primary-main {
+  color: #133e87 !important;
+}
+
 .text-primary {
   color: #133e87 !important;
   font-style: normal;
