@@ -73,7 +73,10 @@ p.fs-3 {
 
 .result-graph .div {
   background-color: #ffffff;
-  width: 1440px;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem;
   height: 1149px;
   position: relative;
 }
@@ -89,12 +92,15 @@ p.fs-3 {
 
 .result-graph .top-bar {
   display: flex;
-  width: 1120px;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  left: 0;
   align-items: center;
   justify-content: space-between;
   position: relative;
   top: 16px;
-  left: 160px;
 }
 
 .result-graph .button {
@@ -112,10 +118,12 @@ p.fs-3 {
 
 .result-graph .rectangle {
   position: absolute;
-  width: 1227px;
+  width: 90%;
+  max-width: 1227px;
+  left: 50%;
+  transform: translateX(-50%);
   height: 528px;
   top: 584px;
-  left: 117px;
   background-color: #d9d9d9;
 }
 
@@ -302,4 +310,47 @@ footer {
 
 .nav-link:hover {
   text-decoration: underline;
+}
+
+/* === Responsive Adjustments for Smaller Screens === */
+@media (max-width: 768px) {
+  .result-card {
+    min-height: 100px;
+    font-size: 1.25rem;
+    padding: 1rem;
+  }
+
+  .section-results {
+    padding: 1.5rem;
+  }
+
+  .upload-icons {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 2rem;
+  }
+
+  h2.h1 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .overlap-group,
+  .overlap-group-2 {
+    width: 90%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .rectangle {
+    width: 95%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  #gpa-value,
+  #wam-value {
+    font-size: 1.5rem;
+  }
 }
