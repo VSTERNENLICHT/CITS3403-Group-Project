@@ -31,11 +31,11 @@ h1, h2, h3, h5 {
 }
 
 h1.display-5 {
+  color: var(#212121);
   font-size: 64px;
   font-style: normal;
   font-weight: 600;
-  line-height: 80px; /* 125% */
-  color: #212121; 
+  line-height: 80px; /* 125% */ 
   letter-spacing: 1.92px;
 }
 
