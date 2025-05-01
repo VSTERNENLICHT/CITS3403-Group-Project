@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shared WAM Graph</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <h2>Shared WAM Graph from {{ sharer_username }}</h2>
+  <canvas id="wamChart" width="400" height="200"></canvas>
+
+  <script>
+    const ctx = document.getElementById('wamChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ semesters | tojson }},
+        datasets: [{
+          label: 'WAM',
+          data: {{ wam_values | tojson }},
+          fill: false,
+          borderColor: 'blue',
+          tension: 0.1
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: true
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'WAM'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Semester'
+            }
+          }
+        }
+      }
+    });
+
+    {% if include_marks %}
+    // Already shown as data points; no need to annotate further in Chart.js unless using a plugin
+    {% endif %}
+  </script>
+</body>
+</html>

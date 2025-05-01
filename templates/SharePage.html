@@ -46,13 +46,9 @@
             </div>
 
             <div class="mb-3">
-              <label for="exportFormat" class="form-label fw-semibold">Export format</label>
-              <select class="form-select" id="exportFormat" name="exportFormat" required>
-                <option value="" disabled selected>Select a format</option>
-                <option value="pdf">PDF</option>
-                <option value="jpeg">JPEG</option>
-              </select>
-            </div>
+              <label for="sharedto" class="form-label fw-semibold">Share with</label>
+              <input type="text" class="form-control" id="sharedto" name="sharedto" placeholder="Enter username" required>
+            </div>            
 
             <div class="text-center">
               <button type="submit" class="btn btn-primary w-100">Generate</button>
@@ -70,31 +66,26 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        document.getElementById('shareForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-        
-            const marks = document.getElementById('shareMarks').value;
-            const format = document.getElementById('exportFormat').value;
-        
-            fetch('/generate-graph', {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                shareMarks: marks,
-                exportFormat: format
-                })
-            })
-            .then(response => response.blob())
-            .then(blob => {
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = `calcmywam_graph.${format}`;
-                link.click();
-            })
-            .catch(err => alert("Something went wrong: " + err));
-        });
+      document.getElementById('generateLinkBtn').addEventListener('click', () => {
+        const marks = document.getElementById('shareMarks').value;
+        const recipient = document.getElementById('sharedto').value;
+      
+        fetch('/share-graph', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shareMarks: marks, sharedto: recipient })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.link) {
+            const div = document.getElementById('shareResult');
+            div.innerHTML = `<p class="text-success">Share this link:</p><a href="${data.link}" target="_blank">${data.link}</a>`;
+          } else {
+            alert(data.error || 'Something went wrong');
+          }
+        })
+        .catch(err => alert('Error: ' + err));
+      });
     </script>  
 </body>
 </html>
