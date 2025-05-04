@@ -61,6 +61,10 @@ p.fs-3 {
   height: auto;
 }
 
+.text-primary-main {
+  color: #133e87 !important;
+}
+
 .text-primary {
   color: #133e87 !important;
   font-style: normal;
@@ -96,6 +100,29 @@ p.fs-3 {
 .logout-icon:hover {
   color: #133e87 !important;
   transition: color 0.2s ease;
+}
+
+.go-to-calculator {
+  color: #133e87;
+  border-color: #133e87;
+}
+
+.go-to-calculator:hover {
+  background-color: #608BC1 !important;
+  color: #fff; 
+  transition: color 0.2s ease;
+}
+
+footer {
+  background-color: #f3f3e0;
+  font-size: 14px;
+  padding-bottom: 20px;
+  width: 100vw; 
+  margin-left: calc(-50vw + 50%);
+}
+
+.nav-link:hover {
+  text-decoration: underline;
 }
 
 .topbar-label {
