@@ -26,8 +26,17 @@ def generate_token():
 # --- Routes ---
 
 @app.route('/')
+def home():
+    return render_template('mainpage.html')
+
+@app.route('/set-goal')
+def set_goal():
+    return render_template('set-goal.html')
+
+@app.route('/share')
 def share_page():
     return render_template('SharePage.html')
+
 
 # --- Temporary login route for testing only ---
 @app.route('/login')
@@ -41,6 +50,74 @@ def login():
 def logout():
     logout_user()
     return "Logged out"
+
+
+@app.route('/save-goal', methods=['POST'])
+def save_goal():
+    data = request.get_json()
+    try:
+        wam = float(data['wam'])
+        gpa = float(data['gpa'])
+
+        # Enforce constraints
+        if not (0 <= wam <= 100):
+            return jsonify({"message": "WAM must be between 0 and 100"}), 400
+        if not (0 <= gpa <= 7):
+            return jsonify({"message": "GPA must be between 0 and 7"}), 400
+        if round(gpa, 1) != gpa:
+            return jsonify({"message": "GPA must be rounded to 1 decimal place"}), 400
+
+        new_goal = Goal(wam=wam, gpa=gpa)
+        db.session.add(new_goal)
+        db.session.commit()
+
+        return jsonify({"message": "Your goals have been saved!"}), 200
+
+    except (KeyError, ValueError):
+        return jsonify({"message": "Invalid input format."}), 400
+      
+      
+@app.route('/calculator')
+def calculator():
+    return render_template('test.html')  # or whatever your homepage is
+
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    raw_data = request.form['data']
+    data = json.loads(raw_data)
+
+    unit_scores = []
+    for unit in data['Previous Units']:
+        unit_scores.append(unit[2])
+
+    for unit in data:
+        if unit != 'Previous Units':
+            score = 0
+            for assessment in data[unit]["assessments"]:
+                # weighting = [1], max = [2], marks = [3]
+                score += assessment[1] * (assessment[3] / assessment[2])
+            unit_scores.append(score)
+
+    unit_count = len(unit_scores)
+    total_scores = sum(unit_scores)
+    total_gpa = 0
+    for score in unit_scores:
+        if score >= 80:
+            total_gpa += 7.0
+        elif score >= 70:
+            total_gpa += 6.0
+        elif score >= 60:
+            total_gpa += 5.0
+        elif score >= 50:
+            total_gpa += 4.0
+        else:
+            total_gpa += 0.0
+
+    gpa = total_gpa / unit_count
+    wam = total_scores / unit_count
+
+    return render_template('resulttest.html', gpa=gpa, wam=wam)
 
 
 @app.route('/my-shared-graphs')
@@ -136,34 +213,7 @@ def revoke_graph(token):
         return jsonify({'status': 'revoked'})
     return jsonify({'status': 'not found'}), 404
 
-# @app.route('/my-shared-graphs')
-# @login_required
-# def my_shared_graphs():
-#     shares = SharedGraph.query.filter_by(shared_with_id=current_user.id, is_active=True).all()
-#     graphs = []
-#     for s in shares:
-#         sharer = User.query.get(s.user_id)
-#         graphs.append({
-#             'sharer': sharer.email,
-#             'token': s.token,
-#             'include_marks': s.include_marks
-#         })
-#     return render_template('my_shared_graphs.html', graphs=graphs)
-
-# @app.route('/shared-by-me')
-# @login_required
-# def shared_by_me():
-#     shares = SharedGraph.query.filter_by(user_id=current_user.id).all()
-#     results = []
-#     for s in shares:
-#         recipient = User.query.get(s.shared_with_id)
-#         results.append({
-#             'recipient': recipient.email,
-#             'token': s.token,
-#             'include_marks': s.include_marks,
-#             'is_active': s.is_active
-#         })
-#     return render_template('shared_by_me.html', shared_graphs=results)
-
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
