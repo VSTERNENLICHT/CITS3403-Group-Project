@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, render_template, send_file, abort
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
 from models import db, Goal, User, SharedGraph
-import io
 import matplotlib.pyplot as plt
 import secrets
 
@@ -53,14 +52,16 @@ def my_shared_graphs():
     received_graphs = [{
         'sharer': User.query.get(s.user_id).email,
         'token': s.token,
-        'include_marks': s.include_marks
+        'include_marks': s.include_marks,
+        'timestamp': s.timestamp.strftime('%Y-%m-%d %H:%M')
     } for s in received]
 
     sent_graphs = [{
-        'recipient': User.query.get(s.shared_with_id).email,  # ✅ FIXED
+        'recipient': User.query.get(s.shared_with_id).email,
         'token': s.token,
         'include_marks': s.include_marks,
-        'is_active': s.is_active
+        'is_active': s.is_active,
+        'timestamp': s.timestamp.strftime('%Y-%m-%d %H:%M')
     } for s in sent]
 
     return render_template("my_shared_graphs.html",
