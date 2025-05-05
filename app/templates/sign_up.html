@@ -11,11 +11,18 @@
       body {
         background-image: url('{{ url_for("static", filename="Images/background.jpg") }}');
       }
+      input {
+        background-color: rgba(235, 235, 235, 0.4);
+        border: 1px solid rgb(150, 150, 150, 0.5);
+        color: #000;
+        border-radius: 5px;
+        
+      }
       .blur {
         background-color: rgba(255, 255, 255, 0.3);
       }
       .btn-long {
-        width: 200px; /* Adjust the width as needed */
+        width: 200px;
       }
     </style>
   </head>
@@ -25,18 +32,32 @@
         <img src="{{ url_for('static', filename='Images/logo.png')}}" width="135.917" height="60">
       </div>
     </header>
-    <div class="container p-5 my-5 text-center blur">
-      <h1>Sign Up</h1>
-      <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p style="margin-left: -160px; margin-bottom: 0px;">{{ form.email.label }}</p>
-        <p>{{ form.email }}</p>
-        <p style="margin-left: -129.75px; margin-bottom: 0px;">{{ form.password.label }}</p>
-        <p>{{ form.password }}</p>
-        <p style="margin-left: -69.283px; margin-bottom: 0px;">{{ form.confirm_password.label }}</p>
-        <p>{{ form.confirm_password }}</p>
-        {{ form.submit(class="btn btn-success btn-long") }}
-      </form>
-    </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <main>
+      <div class="container p-5 my-5 text-center blur">
+        <h1 style="color: #133e87">Sign Up</h1>
+        <form action="" method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <p style="margin-left: -160px; margin-bottom: 0px;">{{ form.email.label }}</p>
+          <p>{{ form.email }}</p>
+          <p style="color: red; margin-left: -52.367px; margin-top: -8px">{% for error in form.email.errors %}{{error}}{% endfor %}</p>
+          <p style="margin-left: -129.75px; margin-bottom: 0px;">{{ form.password.label }}</p>
+          <p>{{ form.password }}</p>
+          <p style="color: red; margin-left: -52.367px; margin-top: -8px">{% for error in form.password.errors %}{{error}}{% endfor %}</p>
+          <p style="margin-left: -69.283px; margin-bottom: 0px;">{{ form.confirm_password.label }}</p>
+          <p>{{ form.confirm_password }}</p>
+          <p style="color: red; margin-left: -52.367px; margin-top: -8px">{% for error in form.confirm_password.errors %}{{error}}{% endfor %}</p>
+          {{ form.submit(class="btn btn-success btn-long") }}
+        </form>
+      </div>
+    </main>
   </body>
 </html>
