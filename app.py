@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 from models import db, Goal, User, SharedGraph
 import matplotlib.pyplot as plt
 import secrets
+import json
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///goals.db'
@@ -67,7 +68,7 @@ def save_goal():
         if round(gpa, 1) != gpa:
             return jsonify({"message": "GPA must be rounded to 1 decimal place"}), 400
 
-        new_goal = Goal(wam=wam, gpa=gpa)
+        new_goal = Goal(wam=wam, gpa=gpa, user_id=current_user.id)
         db.session.add(new_goal)
         db.session.commit()
 
