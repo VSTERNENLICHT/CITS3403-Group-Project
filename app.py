@@ -18,7 +18,7 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.query.get(user_id)
 
 # --- Helper to generate a secure token ---
 def generate_token():
@@ -42,9 +42,9 @@ def share_page():
 # --- Temporary login route for testing only ---
 @app.route('/login')
 def login():
-    user = User.query.filter_by(email='bob@example.com').first()
+    user = User.query.filter_by(id='alice@example.com').first()
     login_user(user)
-    return "Logged in as " + user.email
+    return "Logged in as " + user.id
 
 # --- Temporary logout route for testing only ---
 @app.route('/logout')
@@ -54,11 +54,19 @@ def logout():
 
 
 @app.route('/save-goal', methods=['POST'])
+@login_required
 def save_goal():
     data = request.get_json()
+    if not data:
+        return jsonify({"message": "Invalid request"}), 400
     try:
         wam = float(data['wam'])
         gpa = float(data['gpa'])
+        user_id = data.get("user_id")
+
+        # Ensure the user_id matches the logged-in user
+        if user_id != current_user.id:
+            return jsonify({"message": "Unauthorized access"}), 403
 
         # Enforce constraints
         if not (0 <= wam <= 100):
@@ -68,11 +76,23 @@ def save_goal():
         if round(gpa, 1) != gpa:
             return jsonify({"message": "GPA must be rounded to 1 decimal place"}), 400
 
-        new_goal = Goal(wam=wam, gpa=gpa, user_id=current_user.id)
-        db.session.add(new_goal)
-        db.session.commit()
+        # Check if goal already exists for current user
+        existing_goal = Goal.query.filter_by(user_id=current_user.id).first()
 
-        return jsonify({"message": "Your goals have been saved!"}), 200
+        if existing_goal:
+            # Update existing goal
+            wam = data.get('wam')
+            gpa = data.get('gpa')
+            existing_goal.wam = wam
+            existing_goal.gpa = gpa
+            db.session.commit()
+            return jsonify({"message": "Your goals have been updated!"}), 200
+        else:
+            # Create new goal
+            new_goal = Goal(user_id=current_user.id, wam=wam, gpa=gpa)
+            db.session.add(new_goal)
+            db.session.commit()
+            return jsonify({"message": "Your goals have been saved!"}), 200
 
     except (KeyError, ValueError):
         return jsonify({"message": "Invalid input format."}), 400
@@ -128,14 +148,14 @@ def my_shared_graphs():
     sent = SharedGraph.query.filter_by(user_id=current_user.id, is_active=True).all()
 
     received_graphs = [{
-        'sharer': User.query.get(s.user_id).email,
+        'sharer': User.query.get(s.user_id).id,
         'token': s.token,
         'include_marks': s.include_marks,
         'timestamp': s.timestamp.strftime('%Y-%m-%d %H:%M')
     } for s in received]
 
     sent_graphs = [{
-        'recipient': User.query.get(s.shared_with_id).email,
+        'recipient': User.query.get(s.shared_with_id).id,
         'token': s.token,
         'include_marks': s.include_marks,
         'is_active': s.is_active,
@@ -156,7 +176,7 @@ def share_graph():
     if not recipient_username:
         return "Recipient username is required", 400
 
-    recipient = User.query.filter_by(email=recipient_username).first()
+    recipient = User.query.filter_by(id=recipient_username).first()
     if not recipient:
         return "Recipient user not found", 404
     
@@ -202,7 +222,7 @@ def view_shared_graph(token):
                            wam_values=wam_values,
                            gpa_values=gpa_values, 
                            include_marks=shared.include_marks,
-                           sharer_username=sharer.email)
+                           sharer_username=sharer.id)
 
 @app.route('/revoke/<token>', methods=['POST'])
 @login_required

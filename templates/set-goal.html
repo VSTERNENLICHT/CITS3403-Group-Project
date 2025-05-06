@@ -31,6 +31,7 @@
           <h2 class="text-center display-6 mb-4 text-primary">Set Your Target WAM & GPA</h2>
           <form id="goalForm" class="bg-light border rounded-4 p-4 shadow-sm">
             <div class="mb-3">
+              <input type="hidden" id="user_id" value="{{ current_user.id }}">
               <label for="targetWAM" class="form-label fw-semibold">Target WAM</label>
               <input
                 type="number"
@@ -76,27 +77,30 @@
 
     <!-- jQuery & AJAX script -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
-    $('#goalForm').on('submit', function(e) {
+      $('#goalForm').on('submit', function(e) {
         e.preventDefault();
+        console.log("current_user.id: ", "{{ current_user.id }}");  // Debugging line to check user ID
         const data = {
-        wam: $('#targetWAM').val(),
-        gpa: $('#targetGPA').val()
+          user_id: $('#user_id').val(),  // Assuming you have the user ID available in your template context
+          wam: $('#targetWAM').val(),
+          gpa: $('#targetGPA').val(),
         };
 
         $.ajax({
-        type: 'POST',
-        url: '/save-goal',
-        contentType: 'application/json',
-        data: JSON.stringify(data),
-        success: function(response) {
+          type: 'POST',
+          url: '/save-goal',
+          contentType: 'application/json',
+          data: JSON.stringify(data),
+          success: function(response) {
             $('#confirmation').removeClass('d-none').text(response.message);
-        },
-        error: function(xhr) {
+          },
+          error: function(xhr) {
             alert('Error saving goals: ' + xhr.responseText);
-        }
+          }
         });
-    });
+      });
     </script>
 </body>
 </html>
