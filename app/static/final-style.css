@@ -29,7 +29,7 @@ h1, h2, h3, h5 {
 }
 
 h1.display-5 {
-  color: var(#212121);
+  color: #212121;
   font-size: 64px;
   font-style: normal;
   font-weight: 600;
