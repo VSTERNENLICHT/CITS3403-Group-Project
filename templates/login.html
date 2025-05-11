@@ -10,7 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
       body {
-        background-image: url('{{ url_for("static", filename="Images/background.jpg") }}');
+        background-image: url('{{ url_for("static", filename="img/background.jpg") }}');
       }
       input {
         background-color: rgba(235, 235, 235, 0.4);
@@ -30,7 +30,7 @@
   <body>
     <header class="border-top pt-2 pb-2 px-5">
       <div class="d-flex justify-content-between align-items-center mb-1 pt-0">
-        <img src="{{ url_for('static', filename='Images/logo.png')}}" width="135.917" height="60">
+        <img src="{{ url_for('static', filename='img/logo.png')}}" width="135.917" height="60">
       </div>
     </header>
     {% with messages = get_flashed_messages() %}
