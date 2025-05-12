@@ -116,9 +116,55 @@ def save_goal():
         return jsonify({"message": "Invalid input format."}), 400
       
       
-@app.route('/calculator')
+@app.route('/calculator', methods=['GET', 'POST'])
 def calculator():
-    return render_template('test.html')  # or whatever your homepage is
+    form = CalcForm()
+
+    if request.method == 'POST':
+        
+
+        form = CalcForm(formdata=request.form)
+        # Step 4: Validate
+        if form.validate():
+            unit_scores = {}
+            gpa_sem = {}
+            wam_sem = {}
+            cumulative_count = 0
+            cumulative_scores = 0
+            cumulative_gpa = 0
+            for unit in form.previous_units_tab[0].previous_units:
+                #print(f"\nUnit: {unit.unit.data}, Semester: {unit.semester.data}, Year: {unit.year.data}")
+                score = unit.mark.data
+                try:
+                    unit_scores[(unit.semester.data[-1], unit.year.data[-1])].append(score)
+                except KeyError:
+                    unit_scores[(unit.semester.data[-1], unit.year.data[-1])] = [score]
+
+            for unit in form.units:
+                #print(f"\nUnit: {unit.unit.data}, Semester: {unit.semester.data}, Year: {unit.year.data}")
+                score = 0
+                for assessment in unit.assessments:
+                    #print(f"  - {assessment.atype.data}: {assessment.student_mark.data}/{assessment.max_mark.data} ({assessment.weight.data}%)")
+                    score += assessment.weight.data * (assessment.student_mark.data / assessment.max_mark.data)
+                try:
+                    unit_scores[(unit.semester.data[-1], unit.year.data[-1])].append(score)
+                except KeyError:
+                    unit_scores[(unit.semester.data[-1], unit.year.data[-1])] = [score]
+            unit_scores = dict(sorted(unit_scores.items(), key=lambda x: (x[0][1], x[0][0])))
+            for sem in unit_scores:
+                cumulative_scores += sum(unit_scores[sem])
+                cumulative_count += len(unit_scores[sem])
+                cumulative_gpa += sum([7.0 if score >= 80 else 6.0 if score >= 70 else 5.0 if score >= 60 else 4.0 if score >= 50 else 0.0 for score in unit_scores[sem]])
+                wam_sem[sem] = cumulative_scores / cumulative_count
+                gpa_sem[sem] = cumulative_gpa / cumulative_count
+            gpa = cumulative_gpa / cumulative_count
+            wam = cumulative_scores / cumulative_count
+            # To Do: Edit this to send it to the results page.
+            return render_template('resulttest.html', gpa=gpa, wam=wam, gpa_sem=gpa_sem, wam_sem=wam_sem)
+        else:
+            print("Validation errors:", form.errors)
+
+    return render_template('newtest.html', form=form)
 
 
 @app.route('/calculate', methods=['POST'])
