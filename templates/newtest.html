@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculate Scores | CalcMyWAM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='final-style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='calc-style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-white text-dark">
+  <!-- ✅ Header stays at top, outside the flex container -->
+  <header class="border-top pt-2 pb-2 px-5">
+    <div class="d-flex justify-content-between align-items-center mb-1 pt-0">
+      <a href="#" class="d-flex align-items-center gap-2">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CalcMyWAM Logo" height="60">
+      </a>
+      <button class="btn btn-outline-primary d-flex align-items-center justify-content-center" title="Log out" style="width: 44px; height: 44px;">
+        <i class="bi bi-box-arrow-right fs-5 logout-icon"></i>
+      </button>
+    </div>
+  </header>
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+  
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="unitTabs" role="tablist">
+      <!-- Tabs will be injected here -->
+    </ul>
+  
+    <!-- Tab content -->
+    <div class="tab-content" id="unitTabContent">
+      <!-- Tab panes will be injected here -->
+    </div>
+  
+    <button type="button" class="btn btn-primary mt-3 ms-2" onclick="addUnit()">Add Unit</button>
+    <button type="submit" class="btn btn-success mt-3 ms-2">Calculate</button>
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete this unit tab? This action cannot be undone.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <script>
+    let semesterIndex = 0;
+    
+    function createPreviousUnitTabHTML(unitIdx) {
+      //unresolved
+      const tabId = `sem-${unitIdx}`;
+    
+      // Nav tab
+      const tabButton = `
+        <li class="nav-item" role="presentation">
+          <div class="d-flex align-items-center">
+            <button class="nav-link ${unitIdx === 0 ? 'active' : ''}" id="sem-${unitIdx}-tab"
+                    data-bs-toggle="tab" data-bs-target="#sem-${unitIdx}" type="button" role="tab">
+              Previous Units
+            </button>
+          </div>
+        </li>`;
+    
+      // Tab content pane
+      const tabPane = `
+        <div class="tab-pane fade ${unitIdx === 0 ? 'show active' : ''}" id="${tabId}" role="tabpanel">
+          <div id="previous_units_tab-${unitIdx}-previous_units" class="mb-2">
+            ${createPreviousUnitHTML(unitIdx, 0)}
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm ms-2" onclick="addPreviousUnit(${unitIdx})">Add Previous Unit</button>
+        </div>`;
+    
+      // Append to DOM
+      document.getElementById('unitTabs').insertAdjacentHTML('beforeend', tabButton);
+      document.getElementById('unitTabContent').insertAdjacentHTML('beforeend', tabPane);
+    }
+
+    function createPreviousUnitHTML(tabIdx, unitIdx) {
+      return `
+        <div class="previousUnit row my-2 mx-2">
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="previous_units_tab-${tabIdx}-previous_units-${unitIdx}-unit" placeholder="Unit Code" required>
+          </div>
+          <div class="col-md-3">
+              <select class="form-control" name="previous_units_tab-${tabIdx}-previous_units-${unitIdx}-semester" required>
+                  <option value="">Select Semester</option>
+                  <option value="Semester 1">Semester 1</option>
+                  <option value="Semester 2">Semester 2</option>
+              </select>
+          </div>
+          <div class="col-md-3">
+              <select class="form-control" name="previous_units_tab-${tabIdx}-previous_units-${unitIdx}-year" required>
+                  <option value="">Select Year</option>
+                  <option value="Year 1">Year 1</option>
+                  <option value="Year 2">Year 2</option>
+                  <option value="Year 3">Year 3</option>
+                  <option value="Year 4">Year 4</option>
+                  <option value="Year 5">Year 5</option>
+              </select>
+          </div>
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="previous_units_tab-${tabIdx}-previous_units-${unitIdx}-mark" type="number" placeholder="Final Mark (%)" required>
+          </div>
+        </div>`;
+    }
+
+    function createAssessmentHTML(unitIdx, assessIdx) {
+      return `
+        <div class="assessment row my-2 mx-2">
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="units-${unitIdx}-assessments-${assessIdx}-atype" placeholder="Assessment Type" required>
+          </div>
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="units-${unitIdx}-assessments-${assessIdx}-weight" type="number" placeholder="Weighting (%)" required>
+          </div>
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="units-${unitIdx}-assessments-${assessIdx}-max_mark" type="number" placeholder="Available Marks" required>
+          </div>
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="units-${unitIdx}-assessments-${assessIdx}-student_mark" type="number" placeholder="Your Marks" required>
+          </div>
+        </div>`;
+    }
+    
+    function createUnitTabHTML(unitIdx) {
+      const tabId = `sem-${unitIdx}`;
+    
+      // Nav tab
+      const tabButton = `
+        <li class="nav-item" role="presentation">
+          <div class="d-flex align-items-center">
+            <button class="nav-link ${unitIdx === 0 ? 'active' : ''}" id="sem-${unitIdx}-tab"
+                    data-bs-toggle="tab" data-bs-target="#sem-${unitIdx}" type="button" role="tab">
+              Unit ${unitIdx + 1}
+            </button>
+            <button type="button" class="btn btn-link btn-sm text-danger p-0 me-3"
+                    onclick="showDeleteModal(${unitIdx})" title="Delete tab">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </li>`;
+    
+      // Tab content pane
+      const tabPane = `
+        <div class="tab-pane fade ${unitIdx === 0 ? 'show active' : ''}" id="${tabId}" role="tabpanel">
+          <div class="row my-2 mx-2">
+            <div class="col-md-4">
+                <input class="form-control" name="units-${unitIdx}-unit" placeholder="Unit Code">
+            </div>
+            <div class="col-md-2">
+                <select class="form-control" name="units-${unitIdx}-semester" required>
+                    <option value="">Select Semester</option>
+                    <option value="Semester 1">Semester 1</option>
+                    <option value="Semester 2">Semester 2</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-control" name="units-${unitIdx}-year" required>
+                    <option value="">Select Year</option>
+                    <option value="Year 1">Year 1</option>
+                    <option value="Year 2">Year 2</option>
+                    <option value="Year 3">Year 3</option>
+                    <option value="Year 4">Year 4</option>
+                    <option value="Year 5">Year 5</option>
+                </select>
+            </div>
+          </div>
+          <div id="units-${unitIdx}-assessments" class="mb-2">
+            ${createAssessmentHTML(unitIdx, 0)}
+          </div>
+    
+          <button type="button" class="btn btn-secondary btn-sm ms-2" onclick="addAssessment(${unitIdx})">Add Assessment</button>
+        </div>`;
+    
+      // Append to DOM
+      document.getElementById('unitTabs').insertAdjacentHTML('beforeend', tabButton);
+      document.getElementById('unitTabContent').insertAdjacentHTML('beforeend', tabPane);
+    }
+    
+    function addUnit() {
+      createUnitTabHTML(semesterIndex);
+      semesterIndex++;
+    }
+    
+    function addAssessment(unitIdx) {
+      const assessContainer = document.getElementById(`units-${unitIdx}-assessments`);
+      const assessCount = assessContainer.querySelectorAll('.assessment').length;
+      assessContainer.insertAdjacentHTML('beforeend', createAssessmentHTML(unitIdx, assessCount));
+    }
+
+    function addPreviousUnit(tabIdx) {
+      const prevUnitContainer = document.getElementById(`previous_units_tab-${tabIdx}-previous_units`);
+      const prevUnitCount = prevUnitContainer.querySelectorAll('.previousUnit').length;
+      prevUnitContainer.insertAdjacentHTML('beforeend', createPreviousUnitHTML(tabIdx, prevUnitCount));
+    }
+    
+    //Initialise the first tab which is previous units
+    createPreviousUnitTabHTML(semesterIndex);
+    semesterIndex++;
+
+    // Auto-add the first semester tab on page load
+    window.onload = () => {
+      addUnit();
+    };
+
+    let tabToDelete = null;
+
+    function showDeleteModal(unitIdx) {
+      tabToDelete = unitIdx;
+      const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+      deleteModal.show();
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+      if (tabToDelete !== null) {
+        document.getElementById(`sem-${tabToDelete}`).remove(); // Remove content pane
+        document.getElementById(`sem-${tabToDelete}-tab`).closest('li').remove(); // Remove nav tab
+        tabToDelete = null;
+        bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+      }
+    });
+
+    /////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
+    // OLD JAVA SCRIPT CODE
+    // This is the old JavaScript code that was used for the previous version of the tabs.
+    /////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
+
+    let tabCount = 0;
+    let activeTabId = null;
+    //const submitUrl = "{{ url_for('calculate') }}"; // URL for form submission
+    const tabs = {};
+
+    function addTab() {
+      const tabId = `tab${tabCount++}`;
+      tabs[tabId] = {};
+
+      const tabButton = document.createElement('div');
+      tabButton.className = 'tab-button d-flex justify-content-between align-items-center';
+      tabButton.dataset.tabId = tabId;
+
+      const label = document.createElement('span');
+      label.className = 'tab-label flex-grow-1';
+      label.textContent = `Tab ${tabCount}`;
+      label.onclick = () => switchTab(tabId);
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn-close btn-sm ms-2';
+      closeBtn.setAttribute('aria-label', 'Close');
+      closeBtn.onclick = (event) => deleteTab(tabId, event);
+
+      tabButton.appendChild(label);
+      tabButton.appendChild(closeBtn);
+      document.getElementById('tabs').appendChild(tabButton);
+
+      const tabContent = document.createElement('div');
+      tabContent.className = 'form-container';
+      tabContent.id = tabId;
+
+      document.getElementById('contentArea').appendChild(tabContent);
+
+      switchTab(tabId); // Switch to the new tab immediately
+    }
+
+    function deleteTab(tabId, event) {
+      event.stopPropagation(); // Prevents triggering the switchTab when clicking the X
+
+      // Remove tab button and content
+      const tabButton = document.querySelector(`.tab-button[data-tab-id="${tabId}"]`);
+      const tabContent = document.getElementById(tabId);
+      tabButton?.remove();
+      tabContent?.remove();
+
+      // Clean up state
+      delete tabs[tabId];
+
+      // Switch to another tab if the active one was deleted
+      if (activeTabId === tabId) {
+        const remainingTabs = document.querySelectorAll('.tab-button');
+        if (remainingTabs.length > 0) {
+          switchTab(remainingTabs[0].dataset.tabId);
+        } else {
+          activeTabId = null;
+          document.getElementById('tabNameInput').value = '';
+        }
+      }
+    }
+
+    function handleAddButton() {
+      if (activeTabId === 'previousUnits') {
+        addPreviousUnit();
+      } else {
+        addFormSection();
+      }
+    }
+
+    function switchTab(tabId) {
+      activeTabId = tabId;
+
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tabId === tabId);
+      });
+
+      document.querySelectorAll('.form-container').forEach(container => {
+        container.classList.toggle('active', container.id === tabId);
+      });
+
+      const addButton = document.getElementById('addButton');
+      const tabSettings = document.getElementById('tabSettings');
+      const tabNameInputGroup = document.getElementById('tabNameInput');
+      const semesterDropdownGroup = document.getElementById('semesterSelect');
+
+      if (tabId === 'previousUnits') {
+        tabSettings.style.display = 'block';
+        addButton.textContent = 'Add Previous Unit';
+        if (tabNameInput) tabNameInputGroup.style.display = 'none';
+        if (semesterSelect) semesterDropdownGroup.style.display = 'none';
+      } else {
+        tabSettings.style.display = 'block';
+        addButton.textContent = 'Add New Section';
+        if (tabNameInput) tabNameInputGroup.style.display = 'block';
+        if (semesterSelect) semesterDropdownGroup.style.display = 'block';
+
+        const currentTabButton = document.querySelector(`.tab-button[data-tab-id="${tabId}"]`);
+        document.getElementById('tabNameInput').value = currentTabButton?.textContent || '';
+        document.getElementById('semesterSelect').value = tabs[tabId].semester || "";
+      }
+    }
+
+    function renameTab() {
+      if (activeTabId === 'previousUnits') return; // Prevent renaming Previous Units
+      const newName = document.getElementById('tabNameInput').value;
+      const currentTabButton = document.querySelector(`.tab-button[data-tab-id="${activeTabId}"]`);
+      if (currentTabButton) {
+        const label = currentTabButton.querySelector('.tab-label');
+        if (label) {
+          label.textContent = newName;
+        }
+        tabs[activeTabId].name = newName;
+      }
+    }
+
+    function updateSemester() {
+      const selectedSemester = document.getElementById('semesterSelect').value;
+      if (tabs[activeTabId]) {
+        tabs[activeTabId].semester = selectedSemester;
+      }
+    }
+
+    /*
+    function addPreviousUnit() {
+      const container = document.getElementById('previousUnits');
+
+      const section = document.createElement('div');
+      section.className = 'form-section';
+
+      section.innerHTML = `
+        <button class="remove-section" onclick="this.parentElement.remove()">×</button>
+
+        <label>
+          Unit Code:
+          <input type="text" name="unitCode[]">
+        </label>
+
+        <label>
+          Semester:
+          <select name="semester[]" class="previous-unit-semester">
+            ${generateSemesterOptions()}
+          </select>
+        </label>
+
+        <label>
+          Final Mark:
+          <input type="number" min="0" max="100" step="1" name="finalMark[]">
+        </label>
+      `;
+
+      container.appendChild(section);
+    }
+      */
+
+    function generateSemesterOptions() {
+      let options = '';
+      for (let year = 2011; year <= 2025; year++) {
+        options += `<option value="Semester 1, ${year}">Semester 1, ${year}</option>`;
+        options += `<option value="Semester 2, ${year}">Semester 2, ${year}</option>`;
+      }
+      return options;
+    }
+
+    function addFormSection() {
+      if (!activeTabId) return;
+
+      const container = document.getElementById(activeTabId);
+
+      const section = document.createElement('div');
+      section.className = 'form-section';
+
+      section.innerHTML = `
+        <button class="remove-section" onclick="this.parentElement.remove()">×</button>      
+
+        <label>
+          Weighting (%):
+          <input type="number" min="0" max="100" step="1" name="weighting[]">
+        </label>
+
+        <label>
+          Marks Available:
+          <input type="number" min="0" step="any" name="marksAvailable[]">
+        </label>
+
+        <label>
+          Your Marks:
+          <input type="number" min="0" step="any" name="yourMarks[]">
+        </label>
+      `;
+
+      /*<label>
+          Assessment Type:
+          <select name="assessmentType[]">
+            <option value="Test">Test</option>
+            <option value="Project">Project</option>
+            <option value="Research Paper">Research Paper</option>
+            <option value="Presentation">Presentation</option>
+            <option value="Lab">Lab</option>
+            <option value="Exam">Exam</option>
+          </select>
+        </label>*/
+
+      container.appendChild(section);
+    }
+
+    /*function submitData() {
+      const allTabs = document.querySelectorAll('.form-container');
+      const result = {};
+
+      allTabs.forEach(tab => {
+        const tabId = tab.id;
+        const sections = tab.querySelectorAll('.form-section');
+        const assessments = [];
+
+        sections.forEach(section => {
+          const completed = section.querySelector('input[type="checkbox"]').checked;
+          const weighting = parseFloat(section.querySelector('input[name="weighting[]"]').value) || 0;
+          const available = parseFloat(section.querySelector('input[name="marksAvailable[]"]').value) || 0;
+          const yourMarks = parseFloat(section.querySelector('input[name="yourMarks[]"]').value) || 0;
+
+          assessments.push([completed, weighting, available, yourMarks]);
+        });
+
+        const tabName = document.querySelector(`.tab-button[data-tab-id="${tabId}"]`)?.textContent || tabId;
+        result[tabName] = assessments;
+      });
+
+      fetch('https://server.com/WIP', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ assessments: result })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then(result => {
+        console.log("Success:", result);
+        alert("Data submitted successfully!");
+      })
+      .catch(error => {
+        console.error("Error submitting data:", error);
+        alert("There was an error submitting the data.");
+      });
+    }*/
+
+    function submitData() {
+      const result = {};
+
+      // Handle Previous Units
+      const previousUnitsContainer = document.getElementById('previousUnits');
+      const previousSections = previousUnitsContainer.querySelectorAll('.form-section');
+      const previousUnits = [];
+
+      previousSections.forEach(section => {
+        const unitCode = section.querySelector('input[name="unitCode[]"]').value.trim();
+        const semester = section.querySelector('select[name="semester[]"]').value;
+        const finalMark = parseFloat(section.querySelector('input[name="finalMark[]"]').value) || 0;
+
+        if (unitCode && semester) {
+          previousUnits.push([unitCode, semester, finalMark]);
+        }
+      });
+
+      result["Previous Units"] = previousUnits;
+
+      // Handle other tabs (regular units)
+      const allTabs = document.querySelectorAll('.form-container');
+      allTabs.forEach(tab => {
+        const tabId = tab.id;
+        if (tabId === "previousUnits") return;
+
+        const sections = tab.querySelectorAll('.form-section');
+        const semester = tabs[tabId].semester || "Semester 1"; // Default to Semester 1 if not set
+        const assessments = [];
+
+        sections.forEach(section => {
+          const weighting = parseInt(section.querySelector('input[name="weighting[]"]').value) || 0;
+          const available = parseInt(section.querySelector('input[name="marksAvailable[]"]').value) || 0;
+          const yourMarks = parseInt(section.querySelector('input[name="yourMarks[]"]').value) || 0;
+
+          assessments.push([weighting, available, yourMarks]);
+        });
+
+        const tabName = document.querySelector(`.tab-button[data-tab-id="${tabId}"] .tab-label`)?.textContent || tabId;
+        result[tabName] = {"semester": semester, "assessments": assessments};
+      });
+
+      // Send via fetch
+      /*
+      fetch(submitUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(result)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then(result => {
+        console.log("Success:", result);
+        alert("Data submitted successfully!");
+      })
+      .catch(error => {
+        console.error("Error submitting data:", error);
+        alert("There was an error submitting the data.");
+      });*/
+
+      document.getElementById('formData').value = JSON.stringify(result);
+      document.getElementById('calcForm').submit();
+    }
+
+    // Initialize with one tab to start
+    addTab();
+  </script>
+</body>
+</html>
