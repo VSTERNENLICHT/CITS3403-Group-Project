@@ -1,7 +1,0 @@
-const gpaEntries = Object.entries(data.gpa_semesters).sort();
-const wamEntries = Object.entries(data.wam_semesters).sort();
-
-// Use GPA labels if available, else WAM labels
-const labels = gpaEntries.length ? gpaEntries.map(([label]) => label) : wamEntries.map(([label]) => label);
-const gpaData = labels.map(label => data.gpa_semesters[label] ?? null);
-const wamData = labels.map(label => data.wam_semesters[label] ?? null);

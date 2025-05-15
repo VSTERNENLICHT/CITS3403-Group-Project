@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template, send_file, abort, fl
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
 from flask_migrate import Migrate
 from forms import LoginForm, Sign_upForm
-from models import db, Goal, User, SharedGraph, GPA, WAM
+from models import db, Goal, User, SharedGraph
 import matplotlib.pyplot as plt
 import secrets
 import json
@@ -163,7 +163,14 @@ def calculate():
 
     return render_template('resultspage.html', gpa=gpa, wam=wam)
 
+# Route to render the HTML page
 @app.route('/results')
+@login_required
+def results_page():
+    return render_template("resultspage.html")
+
+# Route to fetch GPA/WAM data dynamically
+@app.route('/api/results')
 @login_required
 def get_results_data():
     gpa = GPA.query.filter_by(user_id=current_user.id).first()
@@ -173,23 +180,24 @@ def get_results_data():
     if not gpa or not wam:
         return jsonify({"error": "GPA or WAM data missing"}), 404
 
+    # Dynamically extract semester fields from GPA and WAM models
+    def extract_semesters(obj):
+        semesters = {}
+        for field in obj.__table__.columns.keys():
+            if field.startswith("year_") and field != "user_id":
+                year_sem = field.replace("year_", "").replace("_semester_", " Sem ")
+                value = getattr(obj, field)
+                if value != -1:
+                    semesters[year_sem] = value
+        return semesters
+
     response = {
         "gpa": round(gpa.final_gpa, 2),
         "wam": round(wam.final_wam, 2),
         "desired_gpa": round(goal.gpa, 2) if goal else None,
         "desired_wam": round(goal.wam, 2) if goal else None,
-        "gpa_semesters": {
-            "sem1_yr1": gpa.year_1_semester_1,
-            "sem2_yr1": gpa.year_1_semester_2,
-            "sem1_yr2": gpa.year_2_semester_1,
-            "sem2_yr2": gpa.year_2_semester_2
-        },
-        "wam_semesters": {
-            "sem1_yr1": wam.year_1_semester_1,
-            "sem2_yr1": wam.year_1_semester_2,
-            "sem1_yr2": wam.year_2_semester_1,
-            "sem2_yr2": wam.year_2_semester_2
-        }
+        "gpa_semesters": extract_semesters(gpa),
+        "wam_semesters": extract_semesters(wam)
     }
 
     return jsonify(response)
