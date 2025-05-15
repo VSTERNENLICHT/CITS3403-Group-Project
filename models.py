@@ -66,3 +66,8 @@ class WAM(db.Model):
     year_4_semester_2 = db.Column(db.Float, nullable=False)
     year_5_semester_1 = db.Column(db.Float, nullable=False)
     year_5_semester_2 = db.Column(db.Float, nullable=False)
+
+
+class Calculations(db.Model):
+    user_id = db.Column(db.String(120), db.ForeignKey('user.id'), primary_key=True)
+    form_input = db.Column(db.Text, nullable=False)
