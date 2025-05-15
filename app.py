@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template, send_file, abort, fl
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
 from flask_migrate import Migrate
 from forms import LoginForm, Sign_upForm, CalcForm
-from models import db, Goal, User, SharedGraph, GPA, WAM
+from models import db, Goal, User, SharedGraph, GPA, WAM, Calculations
 import matplotlib.pyplot as plt
 import secrets
 import json
@@ -122,11 +122,16 @@ def calculator():
     form = CalcForm()
 
     if request.method == 'POST':
-        
-
         form = CalcForm(formdata=request.form)
         # Step 4: Validate
         if form.validate():
+            # Before calculating and validating value sums, save the form data to the database
+            form_input = json.dumps(form.data)
+            new_user_data = Calculations(user_id=current_user.id, form_input=form_input)
+            db.session.merge(new_user_data)
+            db.session.commit()
+            data_validation = True
+
             unit_scores = {('1', '1'): [], ('1', '2'): [], ('2', '1'): [], ('2', '2'): [], ('3', '1'): [], ('3', '2'): [], ('4', '1'): [], ('4', '2'): [], ('5', '1'): [], ('5', '2'): []}
             gpa_sem = {}
             wam_sem = {}
@@ -135,17 +140,43 @@ def calculator():
             cumulative_gpa = 0
             for unit in form.previous_units_tab[0].previous_units:
                 #print(f"\nUnit: {unit.unit.data}, Semester: {unit.semester.data}, Year: {unit.year.data}")
+                if len(form.previous_units_tab[0].previous_units) == 1 and unit.unit.data == '' and unit.semester.data == '' and unit.year.data == '' and unit.mark.data == '':
+                    # If the first unit is empty, we can skip it
+                    break
+                if unit.mark.data > 100 or unit.mark.data < 0:
+                    data_validation = False
+                    flash(f"Your mark for {unit.unit.data} needs to be between 0 to 100.")
                 score = unit.mark.data
                 unit_scores[(unit.year.data[-1], unit.semester.data[-1])].append(score)
                 
             for unit in form.units:
                 #print(f"\nUnit: {unit.unit.data}, Semester: {unit.semester.data}, Year: {unit.year.data}")
                 score = 0
+                weighting = 0
                 for assessment in unit.assessments:
                     #print(f"  - {assessment.atype.data}: {assessment.student_mark.data}/{assessment.max_mark.data} ({assessment.weight.data}%)")
+                    if assessment.student_mark.data > assessment.max_mark.data:
+                        data_validation = False
+                        flash(f"Your mark for {assessment.atype.data} in {unit.unit.data} exceeds the maximum mark.")
+                    if assessment.max_mark.data <= 0:
+                        data_validation = False
+                        flash(f"The maximum mark for {assessment.atype.data} in {unit.unit.data} needs to be greater than 0.")
+                    if assessment.student_mark.data < 0:
+                        data_validation = False
+                        flash(f"Your mark for {assessment.atype.data} in {unit.unit.data} needs to be greater than or equal to 0.")
+                    if assessment.weight.data < 0 or assessment.weight.data > 100:
+                        data_validation = False
+                        flash(f"The weight for {assessment.atype.data} in {unit.unit.data} needs to be between 0% to 100%.")
                     score += assessment.weight.data * (assessment.student_mark.data / assessment.max_mark.data)
+                    weighting += assessment.weight.data
+                if weighting != 100:
+                    data_validation = False
+                    flash(f"The total weightings for {unit.unit.data} do not add up to 100%.")
+                    
                 unit_scores[(unit.year.data[-1], unit.semester.data[-1])].append(score)
                 
+            if not data_validation:
+                return render_template('calculator.html', form=form, form_data=form.data)
             #unit_scores = dict(sorted(unit_scores.items(), key=lambda x: (x[0][1], x[0][0])))
             for sem in unit_scores:
                 if len(unit_scores[sem]) == 0:
@@ -200,51 +231,29 @@ def calculator():
             
             # Update this with the actual URL of the results page
             #return redirect(url_for('set_goal'))
+            print(form.data)
             return render_template('resulttest.html', gpa=gpa, wam=wam, gpa_sem=gpa_sem, wam_sem=wam_sem)
         else:
             print("Validation errors:", form.errors)
 
-    return render_template('calculator.html', form=form)
+    stored_data = Calculations.query.filter_by(user_id=current_user.id).first()
+    if stored_data:
+        form_data = json.loads(stored_data.form_input)
+        # Remove the CSRF token from the data before populating the form
+        form_data.pop('csrf_token', None)
+        
+    return render_template('calculator.html', form=form, form_data=form_data if stored_data else None)
 
 
-"""
-@app.route('/calculate', methods=['POST'])
-def calculate():
-    raw_data = request.form['data']
-    data = json.loads(raw_data)
-
-    unit_scores = []
-    for unit in data['Previous Units']:
-        unit_scores.append(unit[2])
-
-    for unit in data:
-        if unit != 'Previous Units':
-            score = 0
-            for assessment in data[unit]["assessments"]:
-                # weighting = [1], max = [2], marks = [3]
-                score += assessment[1] * (assessment[3] / assessment[2])
-            unit_scores.append(score)
-
-    unit_count = len(unit_scores)
-    total_scores = sum(unit_scores)
-    total_gpa = 0
-    for score in unit_scores:
-        if score >= 80:
-            total_gpa += 7.0
-        elif score >= 70:
-            total_gpa += 6.0
-        elif score >= 60:
-            total_gpa += 5.0
-        elif score >= 50:
-            total_gpa += 4.0
-        else:
-            total_gpa += 0.0
-
-    gpa = total_gpa / unit_count
-    wam = total_scores / unit_count
-
-    return render_template('resulttest.html', gpa=gpa, wam=wam)
-"""
+@app.route('/reset_form')
+@login_required
+def reset_form():
+    # Clear the form data from the database
+    stored_data = Calculations.query.filter_by(user_id=current_user.id).first()
+    if stored_data:
+        db.session.delete(stored_data)
+        db.session.commit()
+    return redirect(url_for('calculator'))
 
 @app.route('/my-shared-graphs')
 @login_required
