@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify, render_template, send_file, abort, flash, redirect, url_for
-from flask_login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
+from flask import Flask, request, jsonify, render_template, abort, flash, redirect, url_for
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_migrate import Migrate
 from forms import LoginForm, Sign_upForm
 from models import db, Goal, User, SharedGraph
@@ -8,6 +8,8 @@ import secrets
 import json
 import sqlalchemy as sa
 import email_validator
+from urllib.parse import urlparse, urljoin
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///goals.db'
@@ -30,6 +32,12 @@ def load_user(user_id):
 def generate_token():
     return secrets.token_urlsafe(32)
 
+# --- Helper to validate URLs ---
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+
 # --- Routes ---
 # Main Page
 @app.route('/')
@@ -38,6 +46,7 @@ def home():
 
 # Goal Setting Page
 @app.route('/set-goal')
+@login_required
 def set_goal():
     return render_template('set-goal.html')
 
@@ -52,8 +61,14 @@ def login():
         if user is None or not user.check_password(form.password.data):
             flash('Invalid email or password')
             return redirect(url_for('login'))
+        
         login_user(user)
-        return redirect(url_for('calculator'))
+        next_page = request.args.get('next')
+
+        if next_page and is_safe_url(next_page):   # Redirect to the next page if it exists (e.g., if the user was trying to access set-goal page without logging in)
+            return redirect(next_page)
+        else:
+            return redirect(url_for('calculator'))
     return render_template('login.html', form=form)
 
 # Logout
@@ -123,10 +138,12 @@ def save_goal():
         return jsonify({"message": "Invalid input format."}), 400
         
 @app.route('/calculator')
+@login_required
 def calculator():
     return render_template('test.html')  # or whatever your homepage is
 
 @app.route('/calculate', methods=['POST'])
+@login_required
 def calculate():
     raw_data = request.form['data']
     data = json.loads(raw_data)
@@ -191,11 +208,11 @@ def get_results_data():
             "sem2_yr2": wam.year_2_semester_2
         }
     }
-
     return jsonify(response)
 
 # Share Graph Page
 @app.route('/share')
+@login_required
 def share_page():
     return render_template('SharePage.html')
 
