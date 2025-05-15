@@ -18,9 +18,9 @@
         <a href="#" class="d-flex align-items-center gap-2">
           <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CalcMyWAM Logo" height="60">
         </a>
-        <button class="btn btn-outline-primary d-flex align-items-center justify-content-center" title="Log out" style="width: 44px; height: 44px;">
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
           <i class="bi bi-box-arrow-right fs-5 logout-icon"></i>
-        </button>
+        </a>
       </div>
     </header>
 
@@ -93,6 +93,9 @@
           url: '/save-goal',
           contentType: 'application/json',
           data: JSON.stringify(data),
+          xhrFields: {
+            withCredentials: true
+          },
           success: function(response) {
             $('#confirmation').removeClass('d-none').text(response.message);
           },
