@@ -173,8 +173,8 @@ def results_page():
 @app.route('/api/results')
 @login_required
 def get_results_data():
-    gpa = Goal.query.filter_by(user_id=current_user.id).first()
-    wam = Goal.query.filter_by(user_id=current_user.id).first()
+    gpa = GPA.query.filter_by(user_id=current_user.id).first()
+    wam = WAM.query.filter_by(user_id=current_user.id).first()
     goal = Goal.query.filter_by(user_id=current_user.id).first()
 
     if not gpa or not wam:
