@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify, render_template, send_file, abort, flash, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
 from flask_migrate import Migrate
-from forms import LoginForm, Sign_upForm
-from models import db, Goal, User, SharedGraph
+from forms import LoginForm, Sign_upForm, CalcForm
+from models import db, Goal, User, SharedGraph, GPA, WAM
 import matplotlib.pyplot as plt
 import secrets
 import json
@@ -46,7 +46,7 @@ def share_page():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('calculate'))
+        return redirect(url_for('calculator'))
     form = LoginForm()
     if form.validate_on_submit():
         user = db.session.scalar(sa.select(User).where(User.email == form.email.data))
@@ -54,7 +54,7 @@ def login():
             flash('Invalid email or password')
             return redirect(url_for('login'))
         login_user(user)
-        return redirect(url_for('calculate'))
+        return redirect(url_for('calculator'))
     return render_template('login.html', form=form)
 
 @app.route('/sign_up', methods=['GET', 'POST'])
@@ -117,6 +117,7 @@ def save_goal():
       
       
 @app.route('/calculator', methods=['GET', 'POST'])
+@login_required
 def calculator():
     form = CalcForm()
 
@@ -126,7 +127,7 @@ def calculator():
         form = CalcForm(formdata=request.form)
         # Step 4: Validate
         if form.validate():
-            unit_scores = {}
+            unit_scores = {('1', '1'): [], ('1', '2'): [], ('2', '1'): [], ('2', '2'): [], ('3', '1'): [], ('3', '2'): [], ('4', '1'): [], ('4', '2'): [], ('5', '1'): [], ('5', '2'): []}
             gpa_sem = {}
             wam_sem = {}
             cumulative_count = 0
@@ -135,38 +136,78 @@ def calculator():
             for unit in form.previous_units_tab[0].previous_units:
                 #print(f"\nUnit: {unit.unit.data}, Semester: {unit.semester.data}, Year: {unit.year.data}")
                 score = unit.mark.data
-                try:
-                    unit_scores[(unit.semester.data[-1], unit.year.data[-1])].append(score)
-                except KeyError:
-                    unit_scores[(unit.semester.data[-1], unit.year.data[-1])] = [score]
-
+                unit_scores[(unit.year.data[-1], unit.semester.data[-1])].append(score)
+                
             for unit in form.units:
                 #print(f"\nUnit: {unit.unit.data}, Semester: {unit.semester.data}, Year: {unit.year.data}")
                 score = 0
                 for assessment in unit.assessments:
                     #print(f"  - {assessment.atype.data}: {assessment.student_mark.data}/{assessment.max_mark.data} ({assessment.weight.data}%)")
                     score += assessment.weight.data * (assessment.student_mark.data / assessment.max_mark.data)
-                try:
-                    unit_scores[(unit.semester.data[-1], unit.year.data[-1])].append(score)
-                except KeyError:
-                    unit_scores[(unit.semester.data[-1], unit.year.data[-1])] = [score]
-            unit_scores = dict(sorted(unit_scores.items(), key=lambda x: (x[0][1], x[0][0])))
+                unit_scores[(unit.year.data[-1], unit.semester.data[-1])].append(score)
+                
+            #unit_scores = dict(sorted(unit_scores.items(), key=lambda x: (x[0][1], x[0][0])))
             for sem in unit_scores:
+                if len(unit_scores[sem]) == 0:
+                    wam_sem[sem] = -1
+                    gpa_sem[sem] = -1
+                    continue
                 cumulative_scores += sum(unit_scores[sem])
                 cumulative_count += len(unit_scores[sem])
                 cumulative_gpa += sum([7.0 if score >= 80 else 6.0 if score >= 70 else 5.0 if score >= 60 else 4.0 if score >= 50 else 0.0 for score in unit_scores[sem]])
-                wam_sem[sem] = cumulative_scores / cumulative_count
+                wam_sem[sem] = round(cumulative_scores / cumulative_count, 1)
                 gpa_sem[sem] = cumulative_gpa / cumulative_count
-            gpa = cumulative_gpa / cumulative_count
+            gpa = round(cumulative_gpa / cumulative_count, 1)
             wam = cumulative_scores / cumulative_count
-            # To Do: Edit this to send it to the results page.
+            
+            existing_gpa = GPA.query.filter_by(user_id=current_user.id).first()
+            if existing_gpa:
+                existing_gpa.final_gpa = gpa
+                existing_gpa.year_1_semester_1 = gpa_sem[('1', '1')]
+                existing_gpa.year_1_semester_2 = gpa_sem[('1', '2')]
+                existing_gpa.year_2_semester_1 = gpa_sem[('2', '1')]
+                existing_gpa.year_2_semester_2 = gpa_sem[('2', '2')]
+                existing_gpa.year_3_semester_1 = gpa_sem[('3', '1')]
+                existing_gpa.year_3_semester_2 = gpa_sem[('3', '2')]
+                existing_gpa.year_4_semester_1 = gpa_sem[('4', '1')]
+                existing_gpa.year_4_semester_2 = gpa_sem[('4', '2')]
+                existing_gpa.year_5_semester_1 = gpa_sem[('5', '1')]
+                existing_gpa.year_5_semester_2 = gpa_sem[('5', '2')]
+            else:
+                new_gpa = GPA(user_id=current_user.id, final_gpa=gpa, year_1_semester_1=gpa_sem[('1', '1')], year_1_semester_2=gpa_sem[('1', '2')], year_2_semester_1=gpa_sem[('2', '1')], year_2_semester_2=gpa_sem[('2', '2')], year_3_semester_1=gpa_sem[('3', '1')], year_3_semester_2=gpa_sem[('3', '2')], year_4_semester_1=gpa_sem[('4', '1')], year_4_semester_2=gpa_sem[('4', '2')], year_5_semester_1=gpa_sem[('5', '1')], year_5_semester_2=gpa_sem[('5', '2')])
+                db.session.add(new_gpa)
+            db.session.commit()
+
+            existing_wam = WAM.query.filter_by(user_id=current_user.id).first()
+            if existing_wam:
+                existing_wam.final_wam = wam
+                existing_wam.year_1_semester_1 = wam_sem[('1', '1')]
+                existing_wam.year_1_semester_2 = wam_sem[('1', '2')]
+                existing_wam.year_2_semester_1 = wam_sem[('2', '1')]
+                existing_wam.year_2_semester_2 = wam_sem[('2', '2')]
+                existing_wam.year_3_semester_1 = wam_sem[('3', '1')]
+                existing_wam.year_3_semester_2 = wam_sem[('3', '2')]
+                existing_wam.year_4_semester_1 = wam_sem[('4', '1')]
+                existing_wam.year_4_semester_2 = wam_sem[('4', '2')]
+                existing_wam.year_5_semester_1 = wam_sem[('5', '1')]
+                existing_wam.year_5_semester_2 = wam_sem[('5', '2')]
+            else:
+                new_wam = WAM(user_id=current_user.id, final_wam=wam, year_1_semester_1=wam_sem[('1', '1')], year_1_semester_2=wam_sem[('1', '2')], year_2_semester_1=wam_sem[('2', '1')], year_2_semester_2=wam_sem[('2', '2')], year_3_semester_1=wam_sem[('3', '1')], year_3_semester_2=wam_sem[('3', '2')], year_4_semester_1=wam_sem[('4', '1')], year_4_semester_2=wam_sem[('4', '2')], year_5_semester_1=wam_sem[('5', '1')], year_5_semester_2=wam_sem[('5', '2')])
+                db.session.add(new_wam)
+            db.session.commit()
+            
+            #flash('Your GPA and WAM have been calculated successfully!')
+            
+            # Update this with the actual URL of the results page
+            #return redirect(url_for('set_goal'))
             return render_template('resulttest.html', gpa=gpa, wam=wam, gpa_sem=gpa_sem, wam_sem=wam_sem)
         else:
             print("Validation errors:", form.errors)
 
-    return render_template('newtest.html', form=form)
+    return render_template('calculator.html', form=form)
 
 
+"""
 @app.route('/calculate', methods=['POST'])
 def calculate():
     raw_data = request.form['data']
@@ -203,7 +244,7 @@ def calculate():
     wam = total_scores / unit_count
 
     return render_template('resulttest.html', gpa=gpa, wam=wam)
-
+"""
 
 @app.route('/my-shared-graphs')
 @login_required
