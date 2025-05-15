@@ -89,7 +89,7 @@ def save_goal():
         user_id = data.get("user_id")
 
         # Ensure the user_id matches the logged-in user
-        if user_id != current_user.id:
+        if int(user_id) != current_user.id:
             return jsonify({"message": "Unauthorized access"}), 403
 
         # Enforce constraints
@@ -165,7 +165,7 @@ def calculate():
     return render_template('resulttest.html', gpa=gpa, wam=wam)
 
 
-@app.route('/my-shared-graphs')
+@app.route('/my-shared-graphs') # Inbox
 @login_required
 def my_shared_graphs():
     received = SharedGraph.query.filter_by(shared_with_id=current_user.id, is_active=True).all()
@@ -191,7 +191,7 @@ def my_shared_graphs():
                            shared_by_me=sent_graphs)
 
 
-@app.route('/share-graph', methods=['POST'])
+@app.route('/share-graph', methods=['POST'])    # Share graph
 @login_required
 def share_graph():
     include_marks = request.form.get('shareMarks') == 'yes'
@@ -223,7 +223,7 @@ def share_graph():
     return render_template('SharePage.html', share_link=share_link)
 
 
-@app.route('/shared/<token>')
+@app.route('/shared/<token>')   # View shared graph
 @login_required
 def view_shared_graph(token):
     shared = SharedGraph.query.filter_by(token=token, is_active=True).first()
