@@ -104,10 +104,20 @@
         document.getElementById('predicted-wam').innerText = `GPA: ${data.gpa} | WAM: ${data.wam}`;
         document.getElementById('desired-wam').innerText = `GPA: ${data.desired_gpa} | WAM: ${data.desired_wam}`;
 
-        // Step 2: Prepare data for graphs
-        const labels = ['Sem 1 Year 1', 'Sem 2 Year 1', 'Sem 1 Year 2', 'Sem 2 Year 2'];
-        const gpaData = Object.values(data.gpa_semesters).map(val => val === -1 ? null : val);
-        const wamData = Object.values(data.wam_semesters).map(val => val === -1 ? null : val);
+        // Step 2: Prepare data for graphs dynamically
+        const gpaEntries = Object.entries(data.gpa_semesters).sort();
+        const wamEntries = Object.entries(data.wam_semesters).sort();
+
+       // Get all semester labels from both GPA and WAM
+        const allLabels = Array.from(new Set([
+             ...gpaEntries.map(([label]) => label),
+             ...wamEntries.map(([label]) => label)
+             ])).sort();
+
+       const gpaData = allLabels.map(label => data.gpa_semesters[label] ?? null);
+       const wamData = allLabels.map(label => data.wam_semesters[label] ?? null);
+
+       const labels = allLabels;
 
         // Step 3: Inject canvases for graphs
         const chartContainer = document.createElement('div');
