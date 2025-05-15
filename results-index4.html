@@ -82,5 +82,83 @@
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- GPA/WAM Result + Graph Renderer -->
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const response = await fetch('/api/results');
+  const data = await response.json();
+
+  if (data.error) {
+    console.error(data.error);
+    return;
+  }
+
+  // Step 1: Insert GPA/WAM values into the boxes
+  document.getElementById('gpa-value').innerText = data.gpa.toFixed(2);
+  document.getElementById('wam-value').innerText = data.wam.toFixed(2);
+  document.getElementById('predicted-wam').innerText = `GPA: ${data.gpa} | WAM: ${data.wam}`;
+  document.getElementById('desired-wam').innerText = `GPA: ${data.desired_gpa} | WAM: ${data.desired_wam}`;
+
+  // Step 2: Prepare data for graphs
+  const labels = ['Sem 1 Year 1', 'Sem 2 Year 1', 'Sem 1 Year 2', 'Sem 2 Year 2'];
+  const gpaData = Object.values(data.gpa_semesters).map(val => val === -1 ? null : val);
+  const wamData = Object.values(data.wam_semesters).map(val => val === -1 ? null : val);
+
+  // Step 3: Inject canvases for graphs
+  const chartContainer = document.createElement('div');
+  chartContainer.className = 'mt-5';
+  chartContainer.innerHTML = `
+    <canvas id="gpaChart" class="mb-5"></canvas>
+    <canvas id="wamChart"></canvas>
+  `;
+  document.querySelector('main').appendChild(chartContainer);
+
+  // Step 4: Render GPA Chart
+  new Chart(document.getElementById('gpaChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'GPA per Semester',
+        data: gpaData,
+        fill: false,
+        borderColor: '#133e87',
+        tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { min: 0, max: 7 }
+      }
+    }
+  });
+
+  // Step 5: Render WAM Chart
+  new Chart(document.getElementById('wamChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'WAM per Semester',
+        data: wamData,
+        fill: false,
+        borderColor: '#ff9f45',
+        tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { min: 0, max: 100 }
+      }
+    }
+  });
+});
+</script>
+
 </body>
 </html>
