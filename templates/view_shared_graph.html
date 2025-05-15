@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shared WAM Graph</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Bootstrap CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Your unified styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='final-style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+</head>
+
+<body>
+  <div class="container pt-0 pb-0">
+    <header class="border-top pt-2 pb-2 px-5">
+      <div class="d-flex justify-content-between align-items-center mb-1 pt-0">
+        <a href="#" class="d-flex align-items-center gap-2">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CalcMyWAM Logo" height="60">
+        </a>
+    
+        <div class="d-flex align-items-center gap-3">
+          <a href="{{ url_for('my_shared_graphs') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center fs-5 topbar-hover-btn">
+            <i class="bi bi-inbox"></i>
+            <span class="topbar-label">Inbox</span>
+          </a>
+          
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm d-flex align-items-center fs-5 topbar-hover-btn">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="topbar-label">Logout</span>
+          </a>          
+        </div>
+      </div>
+    </header>
+
+
+    <section class="section-spaced">
+      <h2 class="text-center display-6 text-primary mb-0" style="color: black !important;">Shared WAM/GPA Graph from<br></h2>
+      <h2 class="text-center display-6 text-primary mb-5"> {{ sharer_username }} </h2>
+      <p class="text-center fs-3 mb-2" style="color: black !important;">WAM</p>
+      <canvas id="wamChart" width="400" height="200" class="mx-5 mt-3"></canvas>
+    </section>
+
+    <script>
+      const ctx = document.getElementById('wamChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ semesters | tojson }},
+          datasets: [{
+            label: 'WAM',
+            data: {{ wam_values | tojson }},
+            fill: false,
+            borderColor: 'blue',
+            tension: 0.1
+          }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              display: true
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: {{ 'true' if include_marks else 'false' }},
+                text: 'WAM'
+              },
+              ticks: {
+                display: {{ 'true' if include_marks else 'false' }}
+              },
+              grid: {
+                display: {{ 'true' if include_marks else 'false' }}
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Semester'
+              }
+            }
+          }
+        }
+      });
+
+      {% if include_marks %}
+      // Already shown as data points; no need to annotate further in Chart.js unless using a plugin
+      {% endif %}
+    </script>
+
+    
+    <!-- GPA Graph Section -->
+
+    <section class="section-spaced">
+      <p class="text-center fs-3 mb-2" style="color: black !important;">GPA</p>
+      <canvas id="gpaChart" width="400" height="200" class="mx-5 mt-3"></canvas>
+    </section>
+
+    <script>
+      const gpaCtx = document.getElementById('gpaChart').getContext('2d');
+      const gpaChart = new Chart(gpaCtx, {
+        type: 'line',
+        data: {
+          labels: {{ semesters | tojson }},
+          datasets: [{
+            label: 'GPA',
+            data: {{ gpa_values | tojson }},
+            fill: false,
+            borderColor: 'green',
+            tension: 0.1
+          }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              display: true
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: {{ 'true' if include_marks else 'false' }},
+                text: 'GPA'
+              },
+              ticks: {
+                display: {{ 'true' if include_marks else 'false' }}
+              },
+              grid: {
+                display: {{ 'true' if include_marks else 'false' }}
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Semester'
+              }
+            }
+          }
+        }
+      });
+    </script>
+    
+
+    <div class="d-flex justify-content-center gap-3 mt-4 mb-5">
+      <a href="{{ url_for('share_page') }}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left"></i> Go back to Share Page
+      </a>
+      <a href="{{ url_for('my_shared_graphs') }}" class="btn btn-outline-primary">
+        <i class="bi bi-inbox"></i> Go back to Inbox
+      </a>
+    </div>
+  </div>
+</body>
+</html>

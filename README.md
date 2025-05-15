@@ -1,5 +1,5 @@
 # CITS3403 Group Project
-**Group 29**
+Group Code: Group_gc_29
 
 ## Group Members
 | UWA ID |     Name     |  GitHub User Name  |
@@ -19,6 +19,12 @@
 - Compare your results with your goals  
 - Share unit plans and performance with friends
 
-Set up:
+## Set up
+1. Download and unzip the zip file
+2. Open terminal at folder
+3. Create a virtual environment using: `python3 -m venv venv`
+4. Activate the virtual environment using: `source venv/bin/activate`
+5. Install required packages from requirements.txt using: `pip install -r requirements.txt`
+6. Run the application using: `flask run` (Note: This may take some time as some moduels may take a while loading the first time)
 
-Testing:
+## Testing
