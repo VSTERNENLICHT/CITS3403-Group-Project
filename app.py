@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import secrets
 import json
 import sqlalchemy as sa
+import email_validator
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///goals.db'
@@ -54,7 +55,7 @@ def login():
             flash('Invalid email or password')
             return redirect(url_for('login'))
         login_user(user)
-        return redirect(url_for('calculate'))
+        return redirect(url_for('calculator'))
     return render_template('login.html', form=form)
 
 @app.route('/logout')
@@ -65,7 +66,7 @@ def logout():
 @app.route('/sign_up', methods=['GET', 'POST'])
 def sign_up():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('calculator'))
     form = Sign_upForm()
     if form.validate_on_submit():
         user = User(email=form.email.data)
