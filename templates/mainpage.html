@@ -18,8 +18,12 @@
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CalcMyWAM Logo" height="60">
           </a>
           <div>
-            <button class="btn btn-outline-primary me-2">Login</button>
-            <button class="btn btn-primary">Sign Up</button>
+            {% if current_user.is_anonymous %}
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary me-2">Login</a>
+            <a href="{{ url_for('sign_up') }}" class="btn btn-primary">Sign Up</a>
+            {% else %}
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-primary me-2">Logout</a>
+            {% endif %}
           </div>
         </div>
 
@@ -70,18 +74,13 @@
       <!-- Call to Action -->
       <section class="text-center section-spaced">
         <h2 class="h1 display-5 fw-bold">Start your journey with us and <span class="text-primary-main">Smash</span> your uni goals!</h2>
-        <button class="btn btn-lg btn-primary mt-4">Sign Up</button>
+        <a href="{{ url_for('sign_up') }}" class="btn btn-lg btn-primary mt-4">Sign Up</a>
       </section>
 
       <!-- Footer -->
       <footer class="text-center border-top pt-4 mt-5 px-3 bg-custom">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Footer Logo" height="50" class="mb-2">
-        <div class="nav justify-content-center mb-2">
-          <a class="nav-link px-2" href="#">Home</a>
-          <a class="nav-link px-2" href="#">Contact</a>
-          <a class="nav-link px-2" href="#">Privacy</a>
-          <a class="nav-link px-2" href="#">Terms of Use</a>
-        </div>
+        <br>
         <small class="text-muted">© 2025 CalcMyWAM. All rights reserved.</small>
       </footer>
     </div>

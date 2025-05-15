@@ -33,15 +33,6 @@
         <img src="{{ url_for('static', filename='img/logo.png')}}" width="135.917" height="60">
       </div>
     </header>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul>
-      {% for message in messages %}
-      <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
     <main>
       <div class="container p-5 my-5 text-center blur">
         <h1 style="color: #133e87">Login</h1>
@@ -55,6 +46,14 @@
           <p style="color: red; margin-left: -52.367px; margin-top: -8px">{% for error in form.password.errors %}{{error}}{% endfor %}</p>
           {{ form.submit(class="btn btn-success btn-long") }}
         </form>
+        <br>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <p style="color: red;">{{ message }}</p>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
         <br>
         <p>Don't have an account? <a href="{{ url_for('sign_up') }}">Sign up here</a></p>
       </div>

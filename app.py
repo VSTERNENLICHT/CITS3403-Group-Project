@@ -57,6 +57,11 @@ def login():
         return redirect(url_for('calculate'))
     return render_template('login.html', form=form)
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
 @app.route('/sign_up', methods=['GET', 'POST'])
 def sign_up():
     if current_user.is_authenticated:
