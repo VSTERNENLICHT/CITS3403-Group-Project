@@ -1,3 +1,10 @@
+# Route to render the HTML page
+@app.route('/results')
+@login_required
+def results_page():
+    return render_template("results.html")
+
+# Route to fetch GPA/WAM data dynamically
 @app.route('/api/results')
 @login_required
 def get_results_data():
@@ -8,15 +15,14 @@ def get_results_data():
     if not gpa or not wam:
         return jsonify({"error": "GPA or WAM data missing"}), 404
 
-    # Dynamically extract semester GPA/WAM fields
+    # Dynamically extract semester fields from GPA and WAM models
     def extract_semesters(obj):
         semesters = {}
         for field in obj.__table__.columns.keys():
             if field.startswith("year_") and field != "user_id":
-                # Format label like "1 Sem 1"
                 year_sem = field.replace("year_", "").replace("_semester_", " Sem ")
                 value = getattr(obj, field)
-                if value != -1:  # Skip no-data marker
+                if value != -1:
                     semesters[year_sem] = value
         return semesters
 
@@ -30,3 +36,4 @@ def get_results_data():
     }
 
     return jsonify(response)
+
