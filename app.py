@@ -14,7 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///goals.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'dev-secret-key'  # Constant key for development  # Secret key for session management
 
-# Initialize extensions
+# --- Initialize extensions ---
 db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -31,19 +31,17 @@ def generate_token():
     return secrets.token_urlsafe(32)
 
 # --- Routes ---
-
+# Main Page
 @app.route('/')
 def home():
     return render_template('mainpage.html')
 
+# Goal Setting Page
 @app.route('/set-goal')
 def set_goal():
     return render_template('set-goal.html')
 
-@app.route('/share')
-def share_page():
-    return render_template('SharePage.html')
-
+# Login Page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -58,11 +56,13 @@ def login():
         return redirect(url_for('calculator'))
     return render_template('login.html', form=form)
 
+# Logout
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('home'))
 
+# Sign Up Page
 @app.route('/sign_up', methods=['GET', 'POST'])
 def sign_up():
     if current_user.is_authenticated:
@@ -77,6 +77,7 @@ def sign_up():
         return redirect(url_for('login'))
     return render_template('sign_up.html', form=form)
 
+# Goal Setting Page
 @app.route('/save-goal', methods=['POST'])
 @login_required
 def save_goal():
@@ -120,12 +121,10 @@ def save_goal():
 
     except (KeyError, ValueError):
         return jsonify({"message": "Invalid input format."}), 400
-      
-      
+        
 @app.route('/calculator')
 def calculator():
     return render_template('test.html')  # or whatever your homepage is
-
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
@@ -162,8 +161,43 @@ def calculate():
     gpa = total_gpa / unit_count
     wam = total_scores / unit_count
 
-    return render_template('resulttest.html', gpa=gpa, wam=wam)
+    return render_template('resultspage.html', gpa=gpa, wam=wam)
 
+@app.route('/results')
+@login_required
+def get_results_data():
+    gpa = GPA.query.filter_by(user_id=current_user.id).first()
+    wam = WAM.query.filter_by(user_id=current_user.id).first()
+    goal = Goal.query.filter_by(user_id=current_user.id).first()
+
+    if not gpa or not wam:
+        return jsonify({"error": "GPA or WAM data missing"}), 404
+
+    response = {
+        "gpa": round(gpa.final_gpa, 2),
+        "wam": round(wam.final_wam, 2),
+        "desired_gpa": round(goal.gpa, 2) if goal else None,
+        "desired_wam": round(goal.wam, 2) if goal else None,
+        "gpa_semesters": {
+            "sem1_yr1": gpa.year_1_semester_1,
+            "sem2_yr1": gpa.year_1_semester_2,
+            "sem1_yr2": gpa.year_2_semester_1,
+            "sem2_yr2": gpa.year_2_semester_2
+        },
+        "wam_semesters": {
+            "sem1_yr1": wam.year_1_semester_1,
+            "sem2_yr1": wam.year_1_semester_2,
+            "sem1_yr2": wam.year_2_semester_1,
+            "sem2_yr2": wam.year_2_semester_2
+        }
+    }
+
+    return jsonify(response)
+
+# Share Graph Page
+@app.route('/share')
+def share_page():
+    return render_template('SharePage.html')
 
 @app.route('/my-shared-graphs') # Inbox
 @login_required
@@ -221,7 +255,6 @@ def share_graph():
 
     share_link = request.host_url.rstrip('/') + '/shared/' + token
     return render_template('SharePage.html', share_link=share_link)
-
 
 @app.route('/shared/<token>')   # View shared graph
 @login_required
