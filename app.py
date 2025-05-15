@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template, send_file, abort, fl
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required, UserMixin
 from flask_migrate import Migrate
 from forms import LoginForm, Sign_upForm
-from models import db, Goal, User, SharedGraph
+from models import db, Goal, User, SharedGraph, GPA, WAM
 import matplotlib.pyplot as plt
 import secrets
 import json
