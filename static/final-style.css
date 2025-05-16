@@ -190,3 +190,32 @@ footer {
 .nav-link:hover {
   text-decoration: underline;
 }
+
+/* Login and Sign Up Page Specific CSS */
+.blur {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.login-signup-header {
+  color: #133e87;
+}
+
+input {
+  background-color: rgba(235, 235, 235, 0.4);
+  border: 1px solid rgb(150, 150, 150, 0.5);
+  color: #000;
+  border-radius: 5px;
+}
+
+.input-field {
+  color: red; 
+  margin-top: -8px
+}
+
+.flashed {
+  color: red;
+}
+
+.btn-login-signup {
+  width: 200px;
+}
