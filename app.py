@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template, abort, flash, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_migrate import Migrate
+from werkzeug.exceptions import HTTPException
 from forms import LoginForm, Sign_upForm, CalcForm
 from models import db, Goal, User, SharedGraph, GPA, WAM, Calculations
 import matplotlib.pyplot as plt
@@ -433,6 +434,11 @@ def revoke_graph(token):
         db.session.commit()
         return jsonify({'status': 'revoked'})
     return jsonify({'status': 'not found'}), 404
+
+@app.errorhandler(Exception)
+def error(error):
+    if isinstance(error, HTTPException):
+        return render_template('error.html', error_code=error.code, error_message=error.description), error.code
 
 if __name__ == '__main__':
     with app.app_context():
