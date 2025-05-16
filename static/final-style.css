@@ -105,7 +105,7 @@ p.fs-3 {
 /* === Results Page Specific Styles === */
 
 .result-card {
-  background-color: #ababab;
+  background-color: transparent;
   border-radius: 2rem;
   min-height: 120px;
   min-width: 200px;
@@ -117,6 +117,7 @@ p.fs-3 {
 #gpa-value, #wam-value, #predicted-wam, #desired-wam {
   font-size: 2rem;
   font-weight: bold;
+  color: #133e87 !important;
 }
 
 .section-results {
