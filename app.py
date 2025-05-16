@@ -9,10 +9,16 @@ import json
 import sqlalchemy as sa
 import email_validator
 from urllib.parse import urlparse, urljoin
-
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///goals.db'
+
+# Use in-memory DB if running tests
+if os.environ.get("FLASK_ENV") == "testing":
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///goals.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'dev-secret-key'  # Constant key for development  # Secret key for session management
 
@@ -327,14 +333,14 @@ def my_shared_graphs():
     sent = SharedGraph.query.filter_by(user_id=current_user.id, is_active=True).all()
 
     received_graphs = [{
-        'sharer': User.query.get(s.user_id).id,
+        'sharer': User.query.get(s.user_id).email,
         'token': s.token,
         'include_marks': s.include_marks,
         'timestamp': s.timestamp.strftime('%Y-%m-%d %H:%M')
     } for s in received]
 
     sent_graphs = [{
-        'recipient': User.query.get(s.shared_with_id).id,
+        'recipient': User.query.get(s.shared_with_id).email,
         'token': s.token,
         'include_marks': s.include_marks,
         'is_active': s.is_active,
@@ -355,9 +361,9 @@ def share_graph():
     if not recipient_username:
         return "Recipient username is required", 400
 
-    recipient = User.query.filter_by(id=recipient_username).first()
+    recipient = User.query.filter_by(email=recipient_username).first()
     if not recipient:
-        return "Recipient user not found", 404
+        return render_template('SharePage.html', error="User not found.")
     
     if recipient.id == current_user.id:
         return render_template('SharePage.html', error="You cannot share with yourself.")
@@ -369,8 +375,7 @@ def share_graph():
         include_marks=include_marks,
         is_active=True,
         user_id=current_user.id,
-        shared_with_id=recipient.id
-    )
+        shared_with_id=recipient.id)
     db.session.add(shared)
     db.session.commit()
 
@@ -382,25 +387,46 @@ def share_graph():
 def view_shared_graph(token):
     shared = SharedGraph.query.filter_by(token=token, is_active=True).first()
 
-    if not shared or shared.shared_with_id != current_user.id:
+    if not shared:
+        print(f"[DEBUG] No SharedGraph found with token: {token}")
+        abort(403, description="This shared link is invalid or has been revoked.")
+
+    if int(shared.shared_with_id) != int(current_user.id):
+        print(f"[DEBUG] Token matched but user is not authorized. Expected {shared.shared_with_id}, got {current_user.id}")
         abort(403, description="You are not authorized to view this shared graph.")
 
-    goals = Goal.query.filter_by(user_id=shared.user_id).all()
-    if not goals:
-        return "No data available for this user.", 404
+    gpa = GPA.query.filter_by(user_id=shared.user_id).first()
+    wam = WAM.query.filter_by(user_id=shared.user_id).first()
 
-    semesters = list(range(1, len(goals) + 1))
-    wam_values = [g.wam for g in goals]
-    gpa_values = [g.gpa for g in goals]
+    if not gpa or not wam:
+        return "No GPA/WAM data available for this user.", 404
+
+    def extract_semesters(data):
+        semesters = []
+        values = []
+        for i in range(1, 6):
+            for j in range(1, 3):
+                field_name = f'year_{i}_semester_{j}'
+                val = getattr(data, field_name)
+                if val != -1:
+                    semesters.append(f"Y{i} S{j}")
+                    values.append(val)
+        return semesters, values
+
+    gpa_labels, gpa_values = extract_semesters(gpa)
+    wam_labels, wam_values = extract_semesters(wam)
+
+    # Ensure both GPA and WAM use the same semester labels
+    semesters = gpa_labels  # Assuming GPA and WAM are populated identically
 
     sharer = User.query.get(shared.user_id)
-
     return render_template('view_shared_graph.html', 
-                           semesters=semesters,
-                           wam_values=wam_values,
-                           gpa_values=gpa_values, 
-                           include_marks=shared.include_marks,
-                           sharer_username=sharer.id)
+                        semesters=semesters,
+                        wam_values=wam_values,
+                        gpa_values=gpa_values,
+                        include_marks=shared.include_marks,
+                        sharer_username=sharer.email)
+
 
 @app.route('/revoke/<token>', methods=['POST'])
 @login_required
