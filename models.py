@@ -26,8 +26,8 @@ class User(UserMixin, db.Model):
 
 class SharedGraph(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(120), db.ForeignKey('user.id'), nullable=False)
-    shared_with_id = db.Column(db.String(120), db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    shared_with_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     token = db.Column(db.String(64), unique=True, nullable=False)
     include_marks = db.Column(db.Boolean, nullable=False)
@@ -38,3 +38,36 @@ class Goal(db.Model):
     user_id = db.Column(db.String(120), db.ForeignKey('user.id'), primary_key=True)
     wam = db.Column(db.Float, nullable=False)
     gpa = db.Column(db.Float, nullable=False)
+
+class GPA(db.Model):
+    user_id = db.Column(db.String(120), db.ForeignKey('user.id'), nullable=False, primary_key=True)
+    final_gpa = db.Column(db.Float, nullable=False)
+    year_1_semester_1 = db.Column(db.Float, nullable=False)
+    year_1_semester_2 = db.Column(db.Float, nullable=False)
+    year_2_semester_1 = db.Column(db.Float, nullable=False)
+    year_2_semester_2 = db.Column(db.Float, nullable=False)
+    year_3_semester_1 = db.Column(db.Float, nullable=False)
+    year_3_semester_2 = db.Column(db.Float, nullable=False)
+    year_4_semester_1 = db.Column(db.Float, nullable=False)
+    year_4_semester_2 = db.Column(db.Float, nullable=False)
+    year_5_semester_1 = db.Column(db.Float, nullable=False)
+    year_5_semester_2 = db.Column(db.Float, nullable=False)
+
+class WAM(db.Model):
+    user_id = db.Column(db.String(120), db.ForeignKey('user.id'), nullable=False, primary_key=True)
+    final_wam = db.Column(db.Float, nullable=False)
+    year_1_semester_1 = db.Column(db.Float, nullable=False)
+    year_1_semester_2 = db.Column(db.Float, nullable=False)
+    year_2_semester_1 = db.Column(db.Float, nullable=False)
+    year_2_semester_2 = db.Column(db.Float, nullable=False)
+    year_3_semester_1 = db.Column(db.Float, nullable=False)
+    year_3_semester_2 = db.Column(db.Float, nullable=False)
+    year_4_semester_1 = db.Column(db.Float, nullable=False)
+    year_4_semester_2 = db.Column(db.Float, nullable=False)
+    year_5_semester_1 = db.Column(db.Float, nullable=False)
+    year_5_semester_2 = db.Column(db.Float, nullable=False)
+
+
+class Calculations(db.Model):
+    user_id = db.Column(db.String(120), db.ForeignKey('user.id'), primary_key=True)
+    form_input = db.Column(db.Text, nullable=False)

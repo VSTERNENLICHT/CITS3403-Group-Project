@@ -25,6 +25,16 @@ Group Code: Group_gc_29
 3. Create a virtual environment using: `python3 -m venv venv`
 4. Activate the virtual environment using: `source venv/bin/activate`
 5. Install required packages from requirements.txt using: `pip install -r requirements.txt`
-6. Run the application using: `flask run` (Note: This may take some time as some moduels may take a while loading the first time)
+6. Run the application using: `flask run` (Note: This may take some time as some modules may take a while loading the first time)
 
 ## Testing
+Test files are located in `/tests`.
+
+### Unit Tests
+1. Sign-up Page
+2. Login Page
+3. Calculator Page: Use command `python -m unittest tests.test_calculator.py`
+4. Set Goal Page: Use command `python -m unittest tests.test_set_goal.py`
+5. Share Page: Use command `python -m unittest tests.test_share_routes.py`
+
+### System Tests
