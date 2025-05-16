@@ -8,9 +8,7 @@ import matplotlib.pyplot as plt
 import secrets
 import json
 import sqlalchemy as sa
-import email_validator
 from urllib.parse import urlparse, urljoin
-import os
 import traceback
 
 def register_routes(app):
