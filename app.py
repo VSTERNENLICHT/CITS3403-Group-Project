@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify, render_template, abort, flash, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_migrate import Migrate
-from forms import LoginForm, Sign_upForm
-from models import db, Goal, User, SharedGraph
+from forms import LoginForm, Sign_upForm, CalcForm
+from models import db, Goal, User, SharedGraph, GPA, WAM, Calculations
 import matplotlib.pyplot as plt
 import secrets
 import json
