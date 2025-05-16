@@ -1,17 +1,20 @@
+from app_factory import create_app
+from models import db, User, Goal
 import unittest
 import json
-from app import app, db
-from models import User, Goal
 
 class SetGoalTestCase(unittest.TestCase):
 
     def setUp(self):
-        # Configure test app
-        app.config['TESTING'] = True
-        app.config['WTF_CSRF_ENABLED'] = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        self.client = app.test_client()
-        self.ctx = app.app_context()
+        # Create a test version of the app
+        config = {
+            'TESTING': True,
+            'WTF_CSRF_ENABLED': False,
+            'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:'
+        }
+        self.app = create_app(config)
+        self.client = self.app.test_client()
+        self.ctx = self.app.app_context()
         self.ctx.push()
 
         db.create_all()
@@ -22,7 +25,7 @@ class SetGoalTestCase(unittest.TestCase):
         db.session.add(self.user)
         db.session.commit()
 
-        # Log in the user manually via session
+        # Manually log in the user
         with self.client.session_transaction() as session:
             session['_user_id'] = str(self.user.id)
 
