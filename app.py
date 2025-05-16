@@ -251,7 +251,7 @@ def calculator():
                 db.session.add(new_wam)
             db.session.commit()
             
-            return redirect(url_for('results'))
+            return redirect(url_for('results_page'))
         else:
             print("Validation errors:", form.errors)
 
