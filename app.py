@@ -251,12 +251,7 @@ def calculator():
                 db.session.add(new_wam)
             db.session.commit()
             
-            #flash('Your GPA and WAM have been calculated successfully!')
-            
-            # Update this with the actual URL of the results page
-            #return redirect(url_for('set_goal'))
-            print(form.data)
-            return render_template('resultspage.html', gpa=gpa, wam=wam)
+            return redirect(url_for('results'))
         else:
             print("Validation errors:", form.errors)
 
