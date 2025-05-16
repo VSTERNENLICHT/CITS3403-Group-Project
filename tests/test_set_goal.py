@@ -10,25 +10,29 @@ os.environ["FLASK_ENV"] = "testing"
 class SetGoalTestCase(unittest.TestCase):
 
     def setUp(self):
-        # Configure test app
-        app.config['TESTING'] = True
-        app.config['WTF_CSRF_ENABLED'] = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        self.client = app.test_client()
-        self.ctx = app.app_context()
+        config = {
+            'TESTING': True,
+            'WTF_CSRF_ENABLED': False,
+            'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+        }
+        self.app = create_app(config)
+        self.client = self.app.test_client()
+        self.ctx = self.app.app_context()
         self.ctx.push()
 
         db.create_all()
-
-        # Create and login a test user
         self.user = User(email='unittest@test.com')
         self.user.set_password('password')
         db.session.add(self.user)
         db.session.commit()
 
-        # Log in the user manually via session
         with self.client.session_transaction() as session:
             session['_user_id'] = str(self.user.id)
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.ctx.pop()
 
     def test_save_goal_valid(self):
         payload = {
@@ -104,11 +108,6 @@ class SetGoalTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertIn(b'Unauthorized access', response.data)
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.ctx.pop()
 
 if __name__ == '__main__':
     unittest.main()

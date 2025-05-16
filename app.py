@@ -11,14 +11,9 @@ import email_validator
 from urllib.parse import urlparse, urljoin
 import os
 
+
 app = Flask(__name__)
-
-# Use in-memory DB if running tests
-if os.environ.get("FLASK_ENV") == "testing":
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///goals.db'
-
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///goals.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'dev-secret-key'  # Constant key for development  # Secret key for session management
 
