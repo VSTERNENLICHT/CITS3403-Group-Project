@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify, render_template, abort, flash, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_migrate import Migrate
-from forms import LoginForm, Sign_upForm
-from models import db, Goal, User, SharedGraph
+from forms import LoginForm, Sign_upForm, CalcForm
+from models import db, Goal, User, SharedGraph, GPA, WAM, Calculations
 import matplotlib.pyplot as plt
 import secrets
 import json
@@ -137,50 +137,153 @@ def save_goal():
     except (KeyError, ValueError):
         return jsonify({"message": "Invalid input format."}), 400
         
-@app.route('/calculator')
+@app.route('/calculator', methods=['GET', 'POST'])
 @login_required
 def calculator():
-    return render_template('test.html')  # or whatever your homepage is
+    form = CalcForm()
 
-@app.route('/calculate', methods=['POST'])
-@login_required
-def calculate():
-    raw_data = request.form['data']
-    data = json.loads(raw_data)
+    if request.method == 'POST':
+        form = CalcForm(formdata=request.form)
+        # Step 4: Validate
+        if form.validate():
+            # Before calculating and validating value sums, save the form data to the database
+            form_input = json.dumps(form.data)
+            new_user_data = Calculations(user_id=current_user.id, form_input=form_input)
+            db.session.merge(new_user_data)
+            db.session.commit()
+            data_validation = True
 
-    unit_scores = []
-    for unit in data['Previous Units']:
-        unit_scores.append(unit[2])
+            unit_scores = {('1', '1'): [], ('1', '2'): [], ('2', '1'): [], ('2', '2'): [], ('3', '1'): [], ('3', '2'): [], ('4', '1'): [], ('4', '2'): [], ('5', '1'): [], ('5', '2'): []}
+            gpa_sem = {}
+            wam_sem = {}
+            cumulative_count = 0
+            cumulative_scores = 0
+            cumulative_gpa = 0
+            for unit in form.previous_units_tab[0].previous_units:
+                #print(f"\nUnit: {unit.unit.data}, Semester: {unit.semester.data}, Year: {unit.year.data}")
+                if len(form.previous_units_tab[0].previous_units) == 1 and unit.unit.data == '' and unit.semester.data == '' and unit.year.data == '' and unit.mark.data == '':
+                    # If the first unit is empty, we can skip it
+                    break
+                if unit.mark.data > 100 or unit.mark.data < 0:
+                    data_validation = False
+                    flash(f"Your mark for {unit.unit.data} needs to be between 0 to 100.")
+                score = unit.mark.data
+                unit_scores[(unit.year.data[-1], unit.semester.data[-1])].append(score)
+                
+            for unit in form.units:
+                #print(f"\nUnit: {unit.unit.data}, Semester: {unit.semester.data}, Year: {unit.year.data}")
+                score = 0
+                weighting = 0
+                for assessment in unit.assessments:
+                    #print(f"  - {assessment.atype.data}: {assessment.student_mark.data}/{assessment.max_mark.data} ({assessment.weight.data}%)")
+                    if assessment.student_mark.data > assessment.max_mark.data:
+                        data_validation = False
+                        flash(f"Your mark for {assessment.atype.data} in {unit.unit.data} exceeds the maximum mark.")
+                    if assessment.max_mark.data <= 0:
+                        data_validation = False
+                        flash(f"The maximum mark for {assessment.atype.data} in {unit.unit.data} needs to be greater than 0.")
+                    if assessment.student_mark.data < 0:
+                        data_validation = False
+                        flash(f"Your mark for {assessment.atype.data} in {unit.unit.data} needs to be greater than or equal to 0.")
+                    if assessment.weight.data < 0 or assessment.weight.data > 100:
+                        data_validation = False
+                        flash(f"The weight for {assessment.atype.data} in {unit.unit.data} needs to be between 0% to 100%.")
+                    score += assessment.weight.data * (assessment.student_mark.data / assessment.max_mark.data)
+                    weighting += assessment.weight.data
+                if weighting != 100:
+                    data_validation = False
+                    flash(f"The total weightings for {unit.unit.data} do not add up to 100%.")
+                    
+                unit_scores[(unit.year.data[-1], unit.semester.data[-1])].append(score)
+                
+            if not data_validation:
+                return render_template('calculator.html', form=form, form_data=form.data)
+            #unit_scores = dict(sorted(unit_scores.items(), key=lambda x: (x[0][1], x[0][0])))
+            for sem in unit_scores:
+                if len(unit_scores[sem]) == 0:
+                    wam_sem[sem] = -1
+                    gpa_sem[sem] = -1
+                    continue
+                cumulative_scores += sum(unit_scores[sem])
+                cumulative_count += len(unit_scores[sem])
+                cumulative_gpa += sum([7.0 if score >= 80 else 6.0 if score >= 70 else 5.0 if score >= 60 else 4.0 if score >= 50 else 0.0 for score in unit_scores[sem]])
+                wam_sem[sem] = round(cumulative_scores / cumulative_count, 1)
+                gpa_sem[sem] = cumulative_gpa / cumulative_count
+            gpa = round(cumulative_gpa / cumulative_count, 1)
+            wam = cumulative_scores / cumulative_count
+            
+            existing_gpa = GPA.query.filter_by(user_id=current_user.id).first()
+            if existing_gpa:
+                existing_gpa.final_gpa = gpa
+                existing_gpa.year_1_semester_1 = gpa_sem[('1', '1')]
+                existing_gpa.year_1_semester_2 = gpa_sem[('1', '2')]
+                existing_gpa.year_2_semester_1 = gpa_sem[('2', '1')]
+                existing_gpa.year_2_semester_2 = gpa_sem[('2', '2')]
+                existing_gpa.year_3_semester_1 = gpa_sem[('3', '1')]
+                existing_gpa.year_3_semester_2 = gpa_sem[('3', '2')]
+                existing_gpa.year_4_semester_1 = gpa_sem[('4', '1')]
+                existing_gpa.year_4_semester_2 = gpa_sem[('4', '2')]
+                existing_gpa.year_5_semester_1 = gpa_sem[('5', '1')]
+                existing_gpa.year_5_semester_2 = gpa_sem[('5', '2')]
+            else:
+                new_gpa = GPA(user_id=current_user.id, final_gpa=gpa, year_1_semester_1=gpa_sem[('1', '1')], year_1_semester_2=gpa_sem[('1', '2')], year_2_semester_1=gpa_sem[('2', '1')], year_2_semester_2=gpa_sem[('2', '2')], year_3_semester_1=gpa_sem[('3', '1')], year_3_semester_2=gpa_sem[('3', '2')], year_4_semester_1=gpa_sem[('4', '1')], year_4_semester_2=gpa_sem[('4', '2')], year_5_semester_1=gpa_sem[('5', '1')], year_5_semester_2=gpa_sem[('5', '2')])
+                db.session.add(new_gpa)
+            db.session.commit()
 
-    for unit in data:
-        if unit != 'Previous Units':
-            score = 0
-            for assessment in data[unit]["assessments"]:
-                # weighting = [1], max = [2], marks = [3]
-                score += assessment[1] * (assessment[3] / assessment[2])
-            unit_scores.append(score)
-
-    unit_count = len(unit_scores)
-    total_scores = sum(unit_scores)
-    total_gpa = 0
-    for score in unit_scores:
-        if score >= 80:
-            total_gpa += 7.0
-        elif score >= 70:
-            total_gpa += 6.0
-        elif score >= 60:
-            total_gpa += 5.0
-        elif score >= 50:
-            total_gpa += 4.0
+            existing_wam = WAM.query.filter_by(user_id=current_user.id).first()
+            if existing_wam:
+                existing_wam.final_wam = wam
+                existing_wam.year_1_semester_1 = wam_sem[('1', '1')]
+                existing_wam.year_1_semester_2 = wam_sem[('1', '2')]
+                existing_wam.year_2_semester_1 = wam_sem[('2', '1')]
+                existing_wam.year_2_semester_2 = wam_sem[('2', '2')]
+                existing_wam.year_3_semester_1 = wam_sem[('3', '1')]
+                existing_wam.year_3_semester_2 = wam_sem[('3', '2')]
+                existing_wam.year_4_semester_1 = wam_sem[('4', '1')]
+                existing_wam.year_4_semester_2 = wam_sem[('4', '2')]
+                existing_wam.year_5_semester_1 = wam_sem[('5', '1')]
+                existing_wam.year_5_semester_2 = wam_sem[('5', '2')]
+            else:
+                new_wam = WAM(user_id=current_user.id, final_wam=wam, year_1_semester_1=wam_sem[('1', '1')], year_1_semester_2=wam_sem[('1', '2')], year_2_semester_1=wam_sem[('2', '1')], year_2_semester_2=wam_sem[('2', '2')], year_3_semester_1=wam_sem[('3', '1')], year_3_semester_2=wam_sem[('3', '2')], year_4_semester_1=wam_sem[('4', '1')], year_4_semester_2=wam_sem[('4', '2')], year_5_semester_1=wam_sem[('5', '1')], year_5_semester_2=wam_sem[('5', '2')])
+                db.session.add(new_wam)
+            db.session.commit()
+            
+            #flash('Your GPA and WAM have been calculated successfully!')
+            
+            # Update this with the actual URL of the results page
+            #return redirect(url_for('set_goal'))
+            print(form.data)
+            return render_template('resultspage.html', gpa=gpa, wam=wam)
         else:
-            total_gpa += 0.0
+            print("Validation errors:", form.errors)
 
-    gpa = total_gpa / unit_count
-    wam = total_scores / unit_count
+    stored_data = Calculations.query.filter_by(user_id=current_user.id).first()
+    if stored_data:
+        form_data = json.loads(stored_data.form_input)
+        # Remove the CSRF token from the data before populating the form
+        form_data.pop('csrf_token', None)
+        
+    return render_template('calculator.html', form=form, form_data=form_data if stored_data else None)
 
-    return render_template('resultspage.html', gpa=gpa, wam=wam)
 
+@app.route('/reset_form')
+@login_required
+def reset_form():
+    # Clear the form data from the database
+    stored_data = Calculations.query.filter_by(user_id=current_user.id).first()
+    if stored_data:
+        db.session.delete(stored_data)
+        db.session.commit()
+    return redirect(url_for('calculator'))
+
+# Route to render the HTML page
 @app.route('/results')
+@login_required
+def results_page():
+    return render_template("resultspage.html")
+
+# Route to fetch GPA/WAM data dynamically
+@app.route('/api/results')
 @login_required
 def get_results_data():
     gpa = GPA.query.filter_by(user_id=current_user.id).first()
@@ -190,23 +293,24 @@ def get_results_data():
     if not gpa or not wam:
         return jsonify({"error": "GPA or WAM data missing"}), 404
 
+    # Dynamically extract semester fields from GPA and WAM models
+    def extract_semesters(obj):
+        semesters = {}
+        for field in obj.__table__.columns.keys():
+            if field.startswith("year_") and field != "user_id":
+                year_sem = field.replace("year_", "").replace("_semester_", " Sem ")
+                value = getattr(obj, field)
+                if value != -1:
+                    semesters[year_sem] = value
+        return semesters
+
     response = {
         "gpa": round(gpa.final_gpa, 2),
         "wam": round(wam.final_wam, 2),
         "desired_gpa": round(goal.gpa, 2) if goal else None,
         "desired_wam": round(goal.wam, 2) if goal else None,
-        "gpa_semesters": {
-            "sem1_yr1": gpa.year_1_semester_1,
-            "sem2_yr1": gpa.year_1_semester_2,
-            "sem1_yr2": gpa.year_2_semester_1,
-            "sem2_yr2": gpa.year_2_semester_2
-        },
-        "wam_semesters": {
-            "sem1_yr1": wam.year_1_semester_1,
-            "sem2_yr1": wam.year_1_semester_2,
-            "sem1_yr2": wam.year_2_semester_1,
-            "sem2_yr2": wam.year_2_semester_2
-        }
+        "gpa_semesters": extract_semesters(gpa),
+        "wam_semesters": extract_semesters(wam)
     }
     return jsonify(response)
 
