@@ -33,8 +33,8 @@ Test files are located in `/tests`.
 ### Unit Tests
 1. Sign-up Page
 2. Login Page
-3. Calculator Page
-4. Set Goal Page: Use command `python -m unittest tests.test_set_goal`
-5. Share Page
+3. Calculator Page: Use command `python -m unittest tests.test_calculator.py`
+4. Set Goal Page: Use command `python -m unittest tests.test_set_goal.py`
+5. Share Page: Use command `python -m unittest tests.test_share_routes.py`
 
 ### System Tests
