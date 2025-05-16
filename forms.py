@@ -9,6 +9,17 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
+    def validate_email(self, email):
+        user = db.session.scalar(sa.select(User).where(User.email == email.data))
+        if user is None:
+            raise ValidationError('No account found.')
+
+    def validate_password(self, password,):
+        user = db.session.scalar(sa.select(User).where(User.email == self.email.data))
+        if user is not None:
+            if not user.check_password(password.data):
+                raise ValidationError('Incorrect password.')
+
 class Sign_upForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired(), Email(message='Invalid email address.')])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8, message="Must be 8+ characters long.")])

@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template, abort, flash, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_migrate import Migrate
+from werkzeug.exceptions import HTTPException
 from forms import LoginForm, Sign_upForm, CalcForm
 from models import db, Goal, User, SharedGraph, GPA, WAM, Calculations
 import matplotlib.pyplot as plt
@@ -55,14 +56,10 @@ def set_goal():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('calculate'))
+        return redirect(url_for('calculator'))
     form = LoginForm()
     if form.validate_on_submit():
         user = db.session.scalar(sa.select(User).where(User.email == form.email.data))
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid email or password')
-            return redirect(url_for('login'))
-        
         login_user(user)
         next_page = request.args.get('next')
 
@@ -82,7 +79,7 @@ def logout():
 @app.route('/sign_up', methods=['GET', 'POST'])
 def sign_up():
     if current_user.is_authenticated:
-        return redirect(url_for('calculator'))
+        return redirect(url_for('home'))
     form = Sign_upForm()
     if form.validate_on_submit():
         user = User(email=form.email.data)
@@ -249,12 +246,7 @@ def calculator():
                 db.session.add(new_wam)
             db.session.commit()
             
-            #flash('Your GPA and WAM have been calculated successfully!')
-            
-            # Update this with the actual URL of the results page
-            #return redirect(url_for('set_goal'))
-            print(form.data)
-            return render_template('resultspage.html', gpa=gpa, wam=wam)
+            return redirect(url_for('results'))
         else:
             print("Validation errors:", form.errors)
 
@@ -432,6 +424,11 @@ def revoke_graph(token):
         db.session.commit()
         return jsonify({'status': 'revoked'})
     return jsonify({'status': 'not found'}), 404
+
+@app.errorhandler(Exception)
+def error(error):
+    if isinstance(error, HTTPException):
+        return render_template('error.html', error_code=error.code, error_message=error.description), error.code
 
 if __name__ == '__main__':
     with app.app_context():
