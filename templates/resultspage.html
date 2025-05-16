@@ -40,7 +40,7 @@
       <!-- Predicted and Desired GPA/WAM Cards -->
       <div class="d-flex flex-column flex-md-row justify-content-around text-center mb-5">
         <div class="mb-4 mb-md-0">
-          <div class="fw-bold fs-4">Predicted GPA/WAM</div>
+          <div class="fw-bold fs-4">Current GPA/WAM</div>
           <div class="result-card d-flex align-items-center justify-content-center">
             <div id="predicted-wam"></div>
           </div>
@@ -61,30 +61,28 @@
       <!-- GPA and WAM Rectangle Section -->
       <section class="section-results text-center">
         <!-- GPA and WAM Line Charts -->
-        <div class="mt-5">
+        <div class="mt-5 text-center">
+          <p class="fs-3 fw-bold mb-1" style="color: black !important;">GPA</p>
           <canvas id="gpaChart" class="mb-5"></canvas>
+
+          <p class="fs-3 fw-bold mb-1" style="color: black !important;">WAM</p>
           <canvas id="wamChart"></canvas>
         </div>
 
         <div class="row h-100">
           <div class="col-md-6 d-flex flex-column justify-content-center">
-            <h5 class="fw-bold fs-1 mb-4">GPA</h5>
             <div id="gpa-value"></div>
           </div>
 
           <div class="col-md-6 d-flex flex-column justify-content-center">
-            <h5 class="fw-bold fs-1 mb-4">WAM</h5>
             <div id="wam-value"></div>
           </div>
         </div>
 
         <!-- Share Icons -->
-        <div class="upload-icons">
-          <a href="/share" class="text-decoration-none text-primary fs-2">
-            <i class="bi bi-share"></i>
-          </a>
-          <a href="/share" class="text-decoration-none text-primary fs-2">
-            <i class="bi bi-share"></i>
+        <div class="d-flex justify-content-center gap-3 mt-4 mb-5">
+          <a href="{{ url_for('share_page') }}" class="btn btn-outline-primary">
+            <i class="bi bi-share"></i> Share
           </a>
         </div>
       </section>
@@ -106,17 +104,12 @@
           return;
         }
 
-        // Step 1: Insert GPA/WAM values into the boxes
-        document.getElementById('gpa-value').innerText = data.gpa.toFixed(2);
-        document.getElementById('wam-value').innerText = data.wam.toFixed(2);
         document.getElementById('predicted-wam').innerText = `GPA: ${data.gpa} | WAM: ${data.wam}`;
         document.getElementById('desired-wam').innerText = `GPA: ${data.desired_gpa} | WAM: ${data.desired_wam}`;
 
-        // Step 2: Prepare data for graphs dynamically
         const gpaEntries = Object.entries(data.gpa_semesters).sort();
         const wamEntries = Object.entries(data.wam_semesters).sort();
 
-       // Get all semester labels from both GPA and WAM
         const allLabels = Array.from(new Set([
              ...gpaEntries.map(([label]) => label),
              ...wamEntries.map(([label]) => label)
