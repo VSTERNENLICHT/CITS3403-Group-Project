@@ -60,14 +60,10 @@ def set_goal():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('calculate'))
+        return redirect(url_for('calculator'))
     form = LoginForm()
     if form.validate_on_submit():
         user = db.session.scalar(sa.select(User).where(User.email == form.email.data))
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid email or password')
-            return redirect(url_for('login'))
-        
         login_user(user)
         next_page = request.args.get('next')
 
@@ -87,7 +83,7 @@ def logout():
 @app.route('/sign_up', methods=['GET', 'POST'])
 def sign_up():
     if current_user.is_authenticated:
-        return redirect(url_for('calculator'))
+        return redirect(url_for('home'))
     form = Sign_upForm()
     if form.validate_on_submit():
         user = User(email=form.email.data)
