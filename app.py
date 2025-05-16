@@ -389,22 +389,38 @@ def view_shared_graph(token):
         print(f"[DEBUG] Token matched but user is not authorized. Expected {shared.shared_with_id}, got {current_user.id}")
         abort(403, description="You are not authorized to view this shared graph.")
 
-    goals = Goal.query.filter_by(user_id=shared.user_id).all()
-    if not goals:
-        return "No data available for this user.", 404
+    gpa = GPA.query.filter_by(user_id=shared.user_id).first()
+    wam = WAM.query.filter_by(user_id=shared.user_id).first()
 
-    semesters = list(range(1, len(goals) + 1))
-    wam_values = [g.wam for g in goals]
-    gpa_values = [g.gpa for g in goals]
+    if not gpa or not wam:
+        return "No GPA/WAM data available for this user.", 404
+
+    def extract_semesters(data):
+        semesters = []
+        values = []
+        for i in range(1, 6):
+            for j in range(1, 3):
+                field_name = f'year_{i}_semester_{j}'
+                val = getattr(data, field_name)
+                if val != -1:
+                    semesters.append(f"Y{i} S{j}")
+                    values.append(val)
+        return semesters, values
+
+    gpa_labels, gpa_values = extract_semesters(gpa)
+    wam_labels, wam_values = extract_semesters(wam)
+
+    # Ensure both GPA and WAM use the same semester labels
+    semesters = gpa_labels  # Assuming GPA and WAM are populated identically
 
     sharer = User.query.get(shared.user_id)
-
     return render_template('view_shared_graph.html', 
-                           semesters=semesters,
-                           wam_values=wam_values,
-                           gpa_values=gpa_values, 
-                           include_marks=shared.include_marks,
-                           sharer_username=sharer.email)
+                        semesters=semesters,
+                        wam_values=wam_values,
+                        gpa_values=gpa_values,
+                        include_marks=shared.include_marks,
+                        sharer_username=sharer.email)
+
 
 @app.route('/revoke/<token>', methods=['POST'])
 @login_required
