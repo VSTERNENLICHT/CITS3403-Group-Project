@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculate Scores | CalcMyWAM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='final-style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='calc-style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-white text-dark">
+  <!-- ✅ Header stays at top, outside the flex container -->
+  <header class="border-top pt-2 pb-2 px-5">
+    <div class="d-flex justify-content-between align-items-center mb-1 pt-0">
+      <a href="#" class="d-flex align-items-center gap-2">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CalcMyWAM Logo" height="60">
+      </a>
+      <button class="btn btn-outline-primary d-flex align-items-center justify-content-center" title="Log out" style="width: 44px; height: 44px;">
+        <i class="bi bi-box-arrow-right fs-5 logout-icon"></i>
+      </button>
+    </div>
+  </header>
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+  
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="unitTabs" role="tablist">
+      <!-- Tabs will be injected here -->
+    </ul>
+  
+    <!-- Tab content -->
+    <div class="tab-content" id="unitTabContent">
+      <!-- Tab panes will be injected here -->
+    </div>
+  
+    <button type="button" class="btn btn-primary mt-3 ms-2" onclick="addUnit()">Add Unit</button>
+    <button type="submit" class="btn btn-success mt-3 ms-2">Calculate</button>
+    <button type="button" class="btn btn-danger mt-3 ms-2" data-bs-toggle="modal" data-bs-target="#resetConfirmModal">Reset</button>
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete this unit tab? This action cannot be undone.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="resetConfirmModal" tabindex="-1" aria-labelledby="resetConfirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="resetConfirmModalLabel">Confirm Reset</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to reset the form? This will erase all your progress.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmResetBtn">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="row my-2 mx-2">
+      <h2>Please fix these errors for calculation to work!</h2>
+    </div>
+    <ul>
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  {% endwith %}
+
+  <script>
+    
+    let unitIndex = 0;
+    const savedData = {{ form_data | tojson|default('null', true) }};
+    function createPreviousUnitTabHTML(unitIdx) {
+      //unresolved
+      const tabId = `sem-${unitIdx}`;
+    
+      // Nav tab
+      const tabButton = `
+        <li class="nav-item" role="presentation">
+          <div class="d-flex align-items-center">
+            <button class="nav-link ${unitIdx === 0 ? 'active' : ''}" id="sem-${unitIdx}-tab"
+                    data-bs-toggle="tab" data-bs-target="#sem-${unitIdx}" type="button" role="tab">
+              Previous Units
+            </button>
+          </div>
+        </li>`;
+    
+      // Tab content pane
+      const tabPane = `
+        <div class="tab-pane fade ${unitIdx === 0 ? 'show active' : ''}" id="${tabId}" role="tabpanel">
+          <div id="previous_units_tab-${unitIdx}-previous_units" class="mb-2">
+            ${createPreviousUnitHTML(unitIdx, 0)}
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm ms-2" onclick="addPreviousUnit(${unitIdx})">Add Previous Unit</button>
+        </div>`;
+    
+      // Append to DOM
+      document.getElementById('unitTabs').insertAdjacentHTML('beforeend', tabButton);
+      document.getElementById('unitTabContent').insertAdjacentHTML('beforeend', tabPane);
+    }
+
+    function createPreviousUnitHTML(tabIdx, unitIdx) {
+      return `
+        <div class="previousUnit row my-2 mx-2">
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="previous_units_tab-${tabIdx}-previous_units-${unitIdx}-unit" placeholder="Unit Code">
+          </div>
+          <div class="col-md-3">
+              <select class="form-control" name="previous_units_tab-${tabIdx}-previous_units-${unitIdx}-semester">
+                  <option value="">Select Semester</option>
+                  <option value="Semester 1">Semester 1</option>
+                  <option value="Semester 2">Semester 2</option>
+              </select>
+          </div>
+          <div class="col-md-3">
+              <select class="form-control" name="previous_units_tab-${tabIdx}-previous_units-${unitIdx}-year">
+                  <option value="">Select Year</option>
+                  <option value="Year 1">Year 1</option>
+                  <option value="Year 2">Year 2</option>
+                  <option value="Year 3">Year 3</option>
+                  <option value="Year 4">Year 4</option>
+                  <option value="Year 5">Year 5</option>
+              </select>
+          </div>
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="previous_units_tab-${tabIdx}-previous_units-${unitIdx}-mark" type="number" placeholder="Final Mark (%)">
+          </div>
+        </div>`;
+    }
+
+    function createAssessmentHTML(unitIdx, assessIdx) {
+      return `
+        <div class="assessment row my-2 mx-2">
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="units-${unitIdx}-assessments-${assessIdx}-atype" placeholder="Assessment Type" required>
+          </div>
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="units-${unitIdx}-assessments-${assessIdx}-weight" type="number" placeholder="Weighting (%)" required>
+          </div>
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="units-${unitIdx}-assessments-${assessIdx}-max_mark" type="number" placeholder="Available Marks" required>
+          </div>
+          <div class="col-md-3">
+            <input style="width:100%" class="form-control" name="units-${unitIdx}-assessments-${assessIdx}-student_mark" type="number" placeholder="Your Marks" required>
+          </div>
+        </div>`;
+    }
+    
+    function createUnitTabHTML(unitIdx) {
+      const tabId = `sem-${unitIdx}`;
+    
+      // Nav tab
+      const tabButton = `
+        <li class="nav-item" role="presentation">
+          <div class="d-flex align-items-center">
+            <button class="nav-link ${unitIdx === 0 ? 'active' : ''}" id="sem-${unitIdx}-tab"
+                    data-bs-toggle="tab" data-bs-target="#sem-${unitIdx}" type="button" role="tab">
+              Unit ${unitIdx}
+            </button>
+            <button type="button" class="btn btn-link btn-sm text-danger p-0 me-3"
+                    onclick="showDeleteModal(${unitIdx})" title="Delete tab">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </li>`;
+    
+      // Tab content pane
+      const tabPane = `
+        <div class="tab-pane fade ${unitIdx === 0 ? 'show active' : ''}" id="${tabId}" role="tabpanel">
+          <div class="row my-2 mx-2">
+            <div class="col-md-4">
+                <input class="form-control" name="units-${unitIdx}-unit" placeholder="Unit Code">
+            </div>
+            <div class="col-md-2">
+                <select class="form-control" name="units-${unitIdx}-semester" required>
+                    <option value="">Select Semester</option>
+                    <option value="Semester 1">Semester 1</option>
+                    <option value="Semester 2">Semester 2</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-control" name="units-${unitIdx}-year" required>
+                    <option value="">Select Year</option>
+                    <option value="Year 1">Year 1</option>
+                    <option value="Year 2">Year 2</option>
+                    <option value="Year 3">Year 3</option>
+                    <option value="Year 4">Year 4</option>
+                    <option value="Year 5">Year 5</option>
+                </select>
+            </div>
+          </div>
+          <div class="row my-2 mx-2">
+            <div class="col-md-3">
+                <h4>Assessments</h4>
+            </div>
+            <div class="col-md-3">
+                <h4>Weighting</h4>
+            </div>
+            <div class="col-md-3">
+                <h4>Available Marks</h4>
+            </div>
+            <div class="col-md-3">
+                <h4>Your Marks</h4>
+            </div>
+          </div>
+          <div id="units-${unitIdx}-assessments" class="mb-2">
+            ${createAssessmentHTML(unitIdx, 0)}
+          </div>
+    
+          <button type="button" class="btn btn-secondary btn-sm ms-2" onclick="addAssessment(${unitIdx})">Add Assessment</button>
+        </div>`;
+    
+      // Append to DOM
+      document.getElementById('unitTabs').insertAdjacentHTML('beforeend', tabButton);
+      document.getElementById('unitTabContent').insertAdjacentHTML('beforeend', tabPane);
+    }
+    
+    function addUnit() {
+      createUnitTabHTML(unitIndex);
+      unitIndex++;
+    }
+    
+    function addAssessment(unitIdx) {
+      const assessContainer = document.getElementById(`units-${unitIdx}-assessments`);
+      const assessCount = assessContainer.querySelectorAll('.assessment').length;
+      assessContainer.insertAdjacentHTML('beforeend', createAssessmentHTML(unitIdx, assessCount));
+    }
+
+    function addPreviousUnit(tabIdx) {
+      const prevUnitContainer = document.getElementById(`previous_units_tab-${tabIdx}-previous_units`);
+      const prevUnitCount = prevUnitContainer.querySelectorAll('.previousUnit').length;
+      prevUnitContainer.insertAdjacentHTML('beforeend', createPreviousUnitHTML(tabIdx, prevUnitCount));
+    }
+    
+    function confirmReset() {
+      const confirmed = confirm("Are you sure you want to reset the form? This will erase all progress.");
+      if (confirmed) {
+        window.location.href = "/reset_form";
+      }
+    }
+
+    //Initialise the first tab which is previous units
+    
+
+    // Auto-add the first semester tab on page load
+    window.onload = () => {
+      if (savedData) {
+        // Rebuild previous units
+        if (savedData.previous_units_tab) {
+          savedData.previous_units_tab.forEach((tab, idx) => {
+            createPreviousUnitTabHTML(idx);
+            tab.previous_units.forEach((unit, unitIdx) => {
+              if (unitIdx > 0) addPreviousUnit(idx);  // Skip 0, it's already added
+              document.querySelector(`[name="previous_units_tab-${idx}-previous_units-${unitIdx}-unit"]`).value = unit.unit;
+              document.querySelector(`[name="previous_units_tab-${idx}-previous_units-${unitIdx}-semester"]`).value = unit.semester;
+              document.querySelector(`[name="previous_units_tab-${idx}-previous_units-${unitIdx}-year"]`).value = unit.year;
+              document.querySelector(`[name="previous_units_tab-${idx}-previous_units-${unitIdx}-mark"]`).value = unit.mark;
+            });
+          });
+          unitIndex = 1;
+        }
+
+        // Rebuild semester tabs
+        if (savedData.units) {
+          savedData.units.forEach((unit, idx) => {
+            createUnitTabHTML(idx+1);
+            document.querySelector(`[name="units-${idx+1}-unit"]`).value = unit.unit;
+            document.querySelector(`[name="units-${idx+1}-semester"]`).value = unit.semester;
+            document.querySelector(`[name="units-${idx+1}-year"]`).value = unit.year;
+
+            unit.assessments.forEach((assessment, aIdx) => {
+              if (aIdx > 0) addAssessment(idx+1);
+              document.querySelector(`[name="units-${idx+1}-assessments-${aIdx}-atype"]`).value = assessment.atype;
+              document.querySelector(`[name="units-${idx+1}-assessments-${aIdx}-weight"]`).value = assessment.weight;
+              document.querySelector(`[name="units-${idx+1}-assessments-${aIdx}-max_mark"]`).value = assessment.max_mark;
+              document.querySelector(`[name="units-${idx+1}-assessments-${aIdx}-student_mark"]`).value = assessment.student_mark;
+            });
+          });
+          unitIndex += savedData.units.length;
+        }
+      } else {
+        // Start with default tabs
+        createPreviousUnitTabHTML(unitIndex++);
+        addUnit();
+      }
+    };
+
+    let tabToDelete = null;
+
+    function showDeleteModal(unitIdx) {
+      tabToDelete = unitIdx;
+      const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+      deleteModal.show();
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+      if (tabToDelete !== null) {
+        document.getElementById(`sem-${tabToDelete}`).remove(); // Remove content pane
+        document.getElementById(`sem-${tabToDelete}-tab`).closest('li').remove(); // Remove nav tab
+        tabToDelete = null;
+        bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+      }
+    });
+
+    document.getElementById('confirmResetBtn').addEventListener('click', () => {
+      window.location.href = "/reset_form";
+    });
+  </script>
+</body>
+</html>
