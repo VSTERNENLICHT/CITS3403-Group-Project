@@ -31,10 +31,8 @@ Group Code: Group_gc_29
 Test files are located in `/tests`.
 
 ### Unit Tests
-1. Sign-up Page
-2. Login Page
-3. Calculator Page: Use command `python -m unittest tests.test_calculator`
-4. Set Goal Page: Use command `python -m unittest tests.test_set_goal`
-5. Share Page: Use command `python -m unittest tests.test_share_routes`
+1. Calculator Page: Use command `python -m unittest tests.test_calculator`
+2. Set Goal Page: Use command `python -m unittest tests.test_set_goal`
+3. Share Page: Use command `python -m unittest tests.test_share_routes`
 
 ### System Tests
